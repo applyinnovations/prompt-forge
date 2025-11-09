@@ -10,65 +10,24 @@ async function init() {
       });
     });
 
-    console.log('Done initializing. Running demo...');
-
-    const configResponse = await promiser('config-get', {});
-    console.log('Running SQLite3 version', configResponse.result.version.libVersion);
+    console.log('Done initializing. Running SQLite3 version', (await promiser('config-get', {})).result.version.libVersion);
 
     const openResponse = await promiser('open', {
-      filename: 'file:prompt-forge.db?vfs=opfs',
+      filename: 'file:prompt-forge-v0.1.0.db?vfs=opfs',
     });
     const { dbId } = openResponse;
     console.log(
-      'OPFS is available, created persisted database at',
+      'OPFS is available, database connected at',
       openResponse.result.filename.replace(/^file:(.*?)\?vfs=opfs$/, '$1'),
     );
-
-    // Create tables
-    await promiser('exec', {
-      dbId,
-      sql: `
-        CREATE TABLE IF NOT EXISTS techniques (
-          id INTEGER PRIMARY KEY,
-          name TEXT NOT NULL,
-          category TEXT NOT NULL,
-          description TEXT
-        );
-
-        CREATE TABLE IF NOT EXISTS prompts (
-          id INTEGER PRIMARY KEY,
-          technique_id INTEGER,
-          content TEXT NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (technique_id) REFERENCES techniques(id)
-        );
-      `,
-    });
 
     // Update UI
     const status = document.getElementById('status');
     if (status) {
-      status.innerHTML = '<p>Application loaded successfully!</p>';
+      status.innerHTML = '<p>Application loaded successfully! Database connected.</p>';
     }
 
-    // Example usage
-    console.log('Prompt-Forge initialized with SQLite WASM');
-
-    // Add a sample technique
-    const addResult = await promiser('exec', {
-      dbId,
-      sql: "INSERT INTO techniques (name, category, description) VALUES (?, ?, ?)",
-      bind: ['Base64 Encoding', 'evasion', 'Encode prompts using Base64 to bypass filters'],
-    });
-    console.log('Add technique result:', addResult);
-
-    // Get techniques
-    const getResult = await promiser('exec', {
-      dbId,
-      sql: "SELECT id, name, category, description FROM techniques",
-      returnValue: 'resultRows',
-    });
-    console.log('Techniques:', getResult.result);
+    // TODO: Add application logic here
 
   } catch (error) {
     console.error('Error loading application:', error);
