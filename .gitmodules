@@ -1,0 +1,3 @@
+[submodule "arc_pi_taxonomy"]
+	path = arc_pi_taxonomy
+	url = https://github.com/Arcanum-Sec/arc_pi_taxonomy.git
