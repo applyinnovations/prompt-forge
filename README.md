@@ -13,19 +13,37 @@ Prompt-Forge is an open-source tool designed for researchers, penetration tester
 
 Prompt-Forge runs entirely in the browser for security and portability. The architecture is modular:
 
-- **UI Layer (`src/ui/`)**: Vanilla web interface built with TypeScript, HTML, and CSS using Vite for development tooling. Handles user interactions and renders the application.
-- **Application Logic Layer (`src/app/`)**: Core functionality implemented in Go, compiled to WebAssembly (WASM). Tested exclusively using Go's testing framework.
-- **Data Layer (`src/db/`)**: Local storage using SQLite WASM with Origin Private File System (OPFS) for persistence, ensuring data remains private and client-side.
+- **UI Layer**: Vanilla web interface built with TypeScript, HTML, and CSS using Vite for development tooling. Handles user interactions and renders the application.
+- **Application Logic Layer**: Core functionality implemented in JavaScript using SQLite WASM for database operations.
+- **Data Layer**: SQLite database with Origin Private File System (OPFS) for persistent local storage in the browser.
 
-This design allows developers to build and test features in Go WASM independently before integrating with the UI.
+This design ensures all logic runs client-side with no server dependencies.
 
 ## Installation
 
-[Add installation instructions here, e.g., clone the repo, install dependencies]
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/applyinnovations/prompt-forge.git
+   cd prompt-forge
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+   The application will be available at `http://localhost:5173/`.
 
 ## Usage
 
-[Add usage examples and commands]
+- Run `npm run dev` to start the development server.
+- The UI provides a basic interface for now; future features will include prompt builder, taxonomy viewer, and attack simulator.
+- All data is stored locally in the browser using SQLite with OPFS for persistence.
 
 ## Attribution
 
@@ -33,4 +51,4 @@ This content/methodology is based on the [Arc PI Taxonomy](https://github.com/Ar
 
 ## License
 
-[Specify the license for prompt-forge, e.g., MIT or whatever applies]
+MIT
