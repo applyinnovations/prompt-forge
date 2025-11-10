@@ -228,7 +228,13 @@ function updatePromptHistoryList(prompts: PromptHistoryItem[]): void {
 function formatRelativeTime(dateString: string): string {
   const now = new Date();
   const date = new Date(dateString);
-  const diffMs = now.getTime() - date.getTime();
+
+  // Adjust for timezone offset - assume database stores UTC
+  // getTimezoneOffset() returns minutes, convert to milliseconds
+  const timezoneOffset = now.getTimezoneOffset() * 60 * 1000;
+  const adjustedDate = new Date(date.getTime() - timezoneOffset);
+
+  const diffMs = now.getTime() - adjustedDate.getTime();
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
