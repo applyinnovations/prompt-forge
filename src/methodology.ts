@@ -82,7 +82,7 @@ export function updateMethodologySelect(types: string[]): void {
 /**
  * Handle methodology application with AI
  */
-async function handleMethodologyApplication(methodology: Methodology): Promise<void> {
+async function handleMethodologyApplication(methodology: Methodology, onPromptBuilt?: (prompt: string) => void): Promise<void> {
   const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
   const modelSelector = document.getElementById('model-selector') as HTMLSelectElement;
 
@@ -141,6 +141,12 @@ async function handleMethodologyApplication(methodology: Methodology): Promise<v
         }
         // Auto-resize textarea as content grows
         autoResizeTextarea();
+      },
+      (builtPrompt) => {
+        // Update recent AI prompt display with the full built prompt
+        if ((window as any).updateRecentAIPrompt) {
+          (window as any).updateRecentAIPrompt(builtPrompt);
+        }
       }
     );
 

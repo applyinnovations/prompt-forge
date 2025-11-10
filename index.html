@@ -94,15 +94,27 @@
          ></textarea>
          <div id="character-count" class="absolute bottom-3 right-3 text-text-muted text-sm pointer-events-none">0</div>
         </div>
-        <div class="flex justify-between items-center mt-2">
-          <div id="predictive-save-info"></div>
-          <div class="flex items-center gap-2">
-            <label for="model-selector" class="text-text-muted text-sm">model:</label>
-            <select id="model-selector" class="bg-surface-primary text-text-muted p-1 text-sm focus:outline-none min-w-32" style="color: #00CC00;">
-              <option value="">Loading models...</option>
-            </select>
-          </div>
-        </div>
+         <div class="flex justify-between items-center mt-2">
+           <div id="predictive-save-info"></div>
+           <div class="flex items-center gap-2">
+             <label for="model-selector" class="text-text-muted text-sm">model:</label>
+             <select id="model-selector" class="bg-surface-primary text-text-muted p-1 text-sm focus:outline-none min-w-32" style="color: #00CC00;">
+               <option value="">Loading models...</option>
+             </select>
+           </div>
+         </div>
+         <div class="mt-4">
+           <label for="custom-methodology-editor" class="text-text-primary text-sm font-medium mb-2 block">Custom Methodology</label>
+           <textarea
+             id="custom-methodology-editor"
+             class="w-full bg-surface-primary border border-border-primary text-text-primary p-3 font-mono resize-none focus:outline-none focus:border-border-secondary min-h-24 overflow-hidden"
+             placeholder="Enter your custom methodology here... (Ctrl+Enter to apply)"
+           ></textarea>
+         </div>
+         <div class="mt-4 hidden" id="recent-ai-prompt-container">
+           <div class="text-text-muted text-xs mb-2">Most Recent AI Prompt:</div>
+           <div id="recent-ai-prompt" class="bg-surface-secondary border border-border-primary p-3 rounded text-text-muted text-sm font-mono whitespace-pre-wrap"></div>
+         </div>
      </div>
 
        <!-- Right Pane: Methodologies -->

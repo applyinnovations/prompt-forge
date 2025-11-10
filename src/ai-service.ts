@@ -169,7 +169,8 @@ export async function applyMethodologyToPrompt(
   originalPrompt: string,
   methodology: any,
   selectedModel: string,
-  onChunk?: (chunk: string) => void
+  onChunk?: (chunk: string) => void,
+  onPromptBuilt?: (prompt: string) => void
 ): Promise<string> {
   const providers = await getConfiguredProviders();
   const model = await findModelById(selectedModel, providers);
@@ -188,6 +189,46 @@ export async function applyMethodologyToPrompt(
 
   const aiPrompt = buildAIPrompt(originalPrompt, methodology);
 
+  // Call the callback with the built prompt if provided
+  if (onPromptBuilt) {
+    onPromptBuilt(aiPrompt);
+  }
+
+  return await sendAIRequest(provider, model, aiPrompt, onChunk);
+}
+
+/**
+ * Apply custom methodology to prompt using AI
+ */
+export async function applyCustomMethodologyToPrompt(
+  originalPrompt: string,
+  customMethodology: string,
+  selectedModel: string,
+  onChunk?: (chunk: string) => void,
+  onPromptBuilt?: (prompt: string) => void
+): Promise<string> {
+  const providers = await getConfiguredProviders();
+  const model = await findModelById(selectedModel, providers);
+
+  if (!model) {
+    throw new Error('Selected model not found or not available');
+  }
+
+  const provider = providers.find(p => p.name === model.provider);
+  if (!provider) {
+    throw new Error('Provider not configured');
+  }
+
+  // Update last used model
+  await updateLastUsedModel(model.provider, selectedModel);
+
+  const aiPrompt = buildCustomAIPrompt(originalPrompt, customMethodology);
+
+  // Call the callback with the built prompt if provided
+  if (onPromptBuilt) {
+    onPromptBuilt(aiPrompt);
+  }
+
   return await sendAIRequest(provider, model, aiPrompt, onChunk);
 }
 
@@ -205,7 +246,7 @@ async function findModelById(modelId: string, providers: AIProvider[]): Promise<
 function buildAIPrompt(originalPrompt: string, methodology: any): string {
   let prompt = `Apply the ${methodology.name} methodology to assist in building a prompt. Instructions are wrapped with the tag <35b3268f73023ec> and the source prompt to be modified is wrapped with the tag <c6c3a6e867c1048f0>.
 
-<35b3268f73023ec> 
+<35b3268f73023ec>
 Methodology Details:
 - Name: ${methodology.name}
 - Description: ${methodology.description.replace("malicious content", "the objective") || 'No description available'}
@@ -229,6 +270,26 @@ Apply the methodology above to transform the prompt below into an effective new 
 ${originalPrompt}
 </c6c3a6e867c1048f0>
 `;
+
+  return prompt;
+}
+
+/**
+ * Build AI prompt for custom methodology application
+ */
+function buildCustomAIPrompt(originalPrompt: string, customMethodology: string): string {
+  const prompt = `Apply the custom methodology provided below to transform the prompt. The custom methodology instructions are wrapped with the tag <35b3268f73023ec> and the source prompt to be modified is wrapped with the tag <c6c3a6e867c1048f0>.
+
+<35b3268f73023ec>
+${customMethodology}
+</35b3268f73023ec>
+
+<c6c3a6e867c1048f0>
+${originalPrompt}
+</c6c3a6e867c1048f0>
+
+Instructions:
+Apply the custom methodology above to transform the prompt below into an effective new prompt. The original prompt should be transformed, so it does not have to be present in your output. Provide only the transformed prompt as your response, without any additional explanation or formatting.`;
 
   return prompt;
 }

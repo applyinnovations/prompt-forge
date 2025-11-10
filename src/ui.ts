@@ -4,7 +4,7 @@ import { loadMethodologies, loadMethodologyTypes, updateMethodologyList, updateM
 import { executeQuery, getDatabasePromiser } from './database.js';
 import { showToast } from './toast.js';
 import { openSettingsModal, setupModal } from './settings.js';
-import { getAvailableModels, applyMethodologyToPrompt, type AIModel } from './ai-service.js';
+import { getAvailableModels, applyMethodologyToPrompt, applyCustomMethodologyToPrompt, type AIModel } from './ai-service.js';
 import { getApiKeys, updateLastUsedModel, getAllProviders } from './api-key-service.js';
 
 let shouldStartNewLineage = false;
@@ -47,6 +47,9 @@ function setupTextarea(): void {
       handleSavePrompt();
     }
   });
+
+  // Setup custom methodology textarea
+  setupCustomMethodologyTextarea();
 
   // Initial setup
   updateCharacterCount();
@@ -106,11 +109,11 @@ function setupModelSelector(): void {
 /**
  * Auto-resize textarea functionality
  */
-export function autoResizeTextarea(): void {
-  const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
-  if (textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+export function autoResizeTextarea(textarea?: HTMLTextAreaElement): void {
+  const targetTextarea = textarea || document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  if (targetTextarea) {
+    targetTextarea.style.height = 'auto';
+    targetTextarea.style.height = targetTextarea.scrollHeight + 'px';
   }
 }
 
@@ -513,3 +516,155 @@ function updateModelSelector(models: AIModel[]): void {
   // Set default selection to most recently used model
   setDefaultModelSelection(selector, models);
 }
+
+/**
+ * Setup custom methodology textarea functionality
+ */
+function setupCustomMethodologyTextarea(): void {
+  const customTextarea = document.getElementById('custom-methodology-editor') as HTMLTextAreaElement;
+  if (!customTextarea) return;
+
+  customTextarea.addEventListener('input', () => {
+    autoResizeTextarea(customTextarea);
+  });
+
+  // Add Ctrl+Enter shortcut to apply custom methodology
+  customTextarea.addEventListener('keydown', (event) => {
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.preventDefault();
+      handleCustomMethodologyApplication();
+    }
+  });
+
+  // Initial setup
+  autoResizeTextarea(customTextarea);
+}
+
+/**
+ * Handle custom methodology application
+ */
+async function handleCustomMethodologyApplication(): Promise<void> {
+  const promptTextarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  const customTextarea = document.getElementById('custom-methodology-editor') as HTMLTextAreaElement;
+  const modelSelector = document.getElementById('model-selector') as HTMLSelectElement;
+
+  if (!promptTextarea || !customTextarea || !modelSelector) {
+    showToast('UI elements not found', 'error');
+    return;
+  }
+
+  const currentPrompt = promptTextarea.value.trim();
+  const customMethodology = customTextarea.value.trim();
+  const selectedModel = modelSelector.value;
+
+  if (!currentPrompt) {
+    showToast('Please enter a prompt first', 'warning');
+    return;
+  }
+
+  if (!customMethodology) {
+    showToast('Please enter a custom methodology', 'warning');
+    return;
+  }
+
+  if (!selectedModel) {
+    showToast('Please select an AI model', 'warning');
+    return;
+  }
+
+  // Check if API keys are configured
+  const apiKeys = await getApiKeys(['openai', 'anthropic', 'xai']);
+  const hasAnyApiKey = !!(apiKeys.openai || apiKeys.anthropic || apiKeys.xai);
+
+  if (!hasAnyApiKey) {
+    showToast('No API keys configured. Please add API keys in settings to use AI features.', 'warning');
+    return;
+  }
+
+  try {
+    // Save current version as manual_edit
+    await savePrompt(currentPrompt, false, 'manual_edit');
+
+    // Show loading state
+    promptTextarea.disabled = true;
+    customTextarea.disabled = true;
+    modelSelector.disabled = true;
+    promptTextarea.value = 'Applying custom methodology...';
+    promptTextarea.style.opacity = '0.7';
+
+    // Apply custom methodology with AI
+    let isFirstChunk = true;
+    const result = await applyCustomMethodologyToPrompt(
+      currentPrompt,
+      customMethodology,
+      selectedModel,
+      (chunk) => {
+        // Handle streaming chunks
+        if (isFirstChunk) {
+          // Replace the "Applying custom methodology..." placeholder with the first chunk
+          promptTextarea.value = chunk;
+          isFirstChunk = false;
+        } else {
+          // Append subsequent chunks
+          promptTextarea.value += chunk;
+        }
+        // Auto-resize textarea as content grows
+        autoResizeTextarea();
+      },
+      (builtPrompt) => {
+        // Update recent AI prompt display with the full built prompt
+        updateRecentAIPrompt(builtPrompt);
+      }
+    );
+
+    // Save the AI-generated result
+    await savePrompt(result, false, 'manual_edit');
+
+    showToast('Applied custom methodology successfully', 'success');
+
+  } catch (error) {
+    console.error('Custom methodology application failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    showToast(`Failed to apply custom methodology: ${errorMessage}`, 'error');
+
+    // Restore original prompt on error
+    promptTextarea.value = currentPrompt;
+  } finally {
+    // Restore UI state
+    const promptTextarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+    const customTextarea = document.getElementById('custom-methodology-editor') as HTMLTextAreaElement;
+    const modelSelector = document.getElementById('model-selector') as HTMLSelectElement;
+
+    if (promptTextarea) {
+      promptTextarea.disabled = false;
+      promptTextarea.style.opacity = '1';
+    }
+    if (customTextarea) {
+      customTextarea.disabled = false;
+    }
+    if (modelSelector) {
+      modelSelector.disabled = false;
+    }
+  }
+}
+
+/**
+ * Update the recent AI prompt display
+ */
+function updateRecentAIPrompt(prompt: string): void {
+  const recentPromptElement = document.getElementById('recent-ai-prompt');
+  const recentPromptContainer = document.getElementById('recent-ai-prompt-container');
+
+  if (recentPromptElement && recentPromptContainer) {
+    if (prompt && prompt.trim()) {
+      recentPromptElement.textContent = prompt;
+      recentPromptContainer.classList.remove('hidden');
+    } else {
+      recentPromptElement.textContent = '';
+      recentPromptContainer.classList.add('hidden');
+    }
+  }
+}
+
+// Make the function globally available for methodology.ts
+(window as any).updateRecentAIPrompt = updateRecentAIPrompt;
