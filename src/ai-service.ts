@@ -222,7 +222,7 @@ Methodology Details:
   prompt += `
 
 Instructions:
-Apply this methodology to transform the original text into an improved version. Provide only the enhanced text as your response, without any additional explanation or formatting.
+Apply this methodology to transform the original text into an improved version. The original text should be transformed, so it does not have to be present in the enhanced output. Provide only the enhanced text as your response, without any additional explanation or formatting.
 
 Original text:\n${originalPrompt}`;
 
