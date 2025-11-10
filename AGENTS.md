@@ -1,10 +1,14 @@
-# Agent Guidelines for Prompt-Forge
+# Agent Guidelines for Prompt Forge
 
 ## Build/Test Commands
-- **Full build**: `npm run build` (Vite production build)
-- **Dev server**: `npm run dev` (starts Vite dev server on port 5173)
+- **Full build**: `npm run build` (Vite production build) - Use this to test builds
+- **Dev server**: `npm run dev` (starts Vite dev server on port 5173) - ⚠️ NEVER RUN: runs indefinitely
 - **Preview**: `npm run preview` (preview production build)
 - **No tests configured**: Add test scripts to package.json when implementing tests
+
+### Important Rules
+- **Never run `npm run dev`** - It runs indefinitely and causes developer experience issues
+- **Always use `npm run build`** to test that the site builds correctly
 
 ## Code Style Guidelines
 

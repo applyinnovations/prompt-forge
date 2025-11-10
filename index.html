@@ -3,15 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prompt-Forge</title>
+  <title>Prompt Forge</title>
   <link rel="stylesheet" href="/src/style.css">
 </head>
-<body class="bg-terminal-black min-h-screen flex items-center justify-center font-mono">
-  <div class="text-center border border-terminal-green p-8 rounded">
-    <h1 class="text-4xl font-bold text-terminal-green mb-4">Prompt-Forge</h1>
-    <p class="text-terminal-green-dark">Loading WASM modules...</p>
-    <div id="status" class="text-terminal-green mt-4"></div>
+<body class="bg-terminal-black min-h-screen font-mono text-terminal-green">
+  <!-- Header with ASCII Art Logo -->
+  <header class="border-b border-terminal-green p-4">
+    <pre class="text-terminal-green text-center">
+██████╗ ██████╗  ██████╗ ███╗   ███╗██████╗ ████████╗    ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
+██╔══██╗██╔══██╗██╔═══██╗████╗ ████║██╔══██╗╚══██╔══╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
+██████╔╝██████╔╝██║   ██║██╔████╔██║██████╔╝   ██║       █████╗  ██║   ██║██████╔╝██║  ███╗█████╗  
+██╔═══╝ ██╔══██╗██║   ██║██║╚██╔╝██║██╔═══╝    ██║       ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝  
+██║     ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║        ██║       ██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
+╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝        ╚═╝       ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+    </pre>
+    <p class="text-center text-terminal-green-dark mt-2">Advanced Prompt Injection Toolkit</p>
+  </header>
+
+  <!-- Main Application Layout -->
+  <div class="flex h-screen">
+    <!-- Left Pane: Prompt History -->
+    <div class="w-1/4 border-r border-terminal-green p-4">
+      <h2 class="text-terminal-yellow mb-4 font-bold">Prompt History</h2>
+      <div id="prompt-history" class="space-y-2">
+        <!-- History items will be populated here -->
+        <div class="border border-terminal-gray p-2 rounded">
+          <div class="text-terminal-green text-sm truncate">Sample prompt text...</div>
+          <div class="text-terminal-gray-light text-xs mt-1">2024-01-01 12:00:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content: Prompt Editor -->
+    <div class="flex-1 p-4">
+      <h2 class="text-terminal-yellow mb-4 font-bold">Prompt Editor</h2>
+      <textarea
+        id="prompt-editor"
+        class="w-full h-96 bg-terminal-black border border-terminal-green text-terminal-green p-3 font-mono resize-none focus:outline-none focus:border-terminal-green"
+        placeholder="Enter your prompt here..."
+      ></textarea>
+    </div>
+
+    <!-- Right Pane: Taxonomy Browser -->
+    <div class="w-1/4 border-l border-terminal-green p-4">
+      <h2 class="text-terminal-yellow mb-4 font-bold">Taxonomy Browser</h2>
+      <select id="taxonomy-select" class="w-full bg-terminal-black border border-terminal-green text-terminal-green p-2 mb-4 focus:outline-none focus:border-terminal-green">
+        <option value="intents">Intents</option>
+        <option value="evasions">Evasions</option>
+        <option value="techniques">Techniques</option>
+      </select>
+      <div id="taxonomy-list" class="space-y-2">
+        <!-- Taxonomy items will be populated here -->
+        <div class="border border-terminal-gray p-2 rounded">
+          <div class="text-terminal-green text-sm">Sample taxonomy item</div>
+          <div class="text-terminal-gray-light text-xs mt-1">Description...</div>
+        </div>
+      </div>
+    </div>
   </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

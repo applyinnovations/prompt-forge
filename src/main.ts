@@ -1,6 +1,6 @@
 import { sqlite3Worker1Promiser } from '@sqlite.org/sqlite-wasm';
 
-async function init() {
+async function initDatabase() {
   try {
     console.log('Loading and initializing SQLite3 module...');
 
@@ -21,21 +21,12 @@ async function init() {
       openResponse.result.filename.replace(/^file:(.*?)\?vfs=opfs$/, '$1'),
     );
 
-    // Update UI
-    const status = document.getElementById('status');
-    if (status) {
-      status.innerHTML = '<p class="text-terminal-green">Application loaded successfully! Database connected.</p>';
-    }
-
-    // TODO: Add application logic here
+    console.log('Database initialized successfully');
 
   } catch (error) {
-    console.error('Error loading application:', error);
-    const status = document.getElementById('status');
-    if (status) {
-      status.innerHTML = '<p class="text-terminal-red">Error loading application: ' + (error as Error).message + '</p>';
-    }
+    console.error('Error initializing database:', error);
   }
 }
 
-init();
+// Initialize database in background
+initDatabase();

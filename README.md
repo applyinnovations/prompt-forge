@@ -1,6 +1,6 @@
-# Prompt-Forge
+# Prompt Forge
 
-Prompt-Forge is an open-source tool designed for researchers, penetration testers, and ethical hackers to iteratively modify, construct, and evolve prompt injection attacks. It leverages the structured techniques and taxonomies from the Arc PI Taxonomy to facilitate the development and testing of adversarial prompts against AI systems.
+Prompt Forge is an open-source tool designed for researchers, penetration testers, and ethical hackers to iteratively modify, construct, and evolve prompt injection attacks. It leverages the structured techniques and taxonomies from the Arc PI Taxonomy to facilitate the development and testing of adversarial prompts against AI systems.
 
 **⚠️ Early Development**: This project is currently in its early stages. The core infrastructure is in place, but the interactive features described below are not yet implemented.
 
