@@ -1,7 +1,7 @@
 import { savePrompt, loadPromptHistory } from './prompt.js';
 import type { PromptHistoryItem } from './prompt.js';
 import { loadMethodologies, loadMethodologyTypes, updateMethodologyList, updateMethodologySelect } from './methodology.js';
-import { wipeDatabase } from './database.js';
+import { executeQuery, getDatabasePromiser, wipeDatabase } from './database.js';
 import { showToast } from './toast.js';
 
 /**
@@ -25,11 +25,21 @@ function setupTextarea(): void {
   textarea.addEventListener('input', () => {
     updateCharacterCount();
     autoResizeTextarea();
+    updatePredictiveSaveInfo();
+  });
+
+  // Add Ctrl+Enter shortcut to save prompt
+  textarea.addEventListener('keydown', (event) => {
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.preventDefault();
+      handleSavePrompt();
+    }
   });
 
   // Initial setup
   updateCharacterCount();
   autoResizeTextarea();
+  // Note: updatePredictiveSaveInfo() will be called after database initialization
 }
 
 /**
@@ -120,8 +130,9 @@ async function handleSavePrompt(): Promise<void> {
     await savePrompt(textarea.value);
     showButtonSuccess(saveButton);
 
-    // Refresh prompt history
+    // Refresh prompt history and predictive save info
     await loadAndUpdatePromptHistory();
+    await updatePredictiveSaveInfo();
   } catch (error) {
     showButtonError(saveButton);
   }
@@ -200,22 +211,16 @@ function updatePromptHistoryList(prompts: PromptHistoryItem[]): void {
   prompts.forEach((prompt) => {
     const item = document.createElement('div');
     item.className = 'border border-border-primary p-2 rounded cursor-pointer hover:bg-surface-secondary transition-colors';
-    const title = prompt.title || 'Untitled';
-    const content = prompt.content || '';
-    const versionNumber = prompt.versionNumber;
-    const createdAt = formatRelativeTime(prompt.createdAt || '');
-    item.innerHTML = `
-      <div class="text-text-primary text-sm truncate">${title}</div>
-      <div class="text-text-muted text-xs mt-1 truncate">${content.substring(0, 50)}${content.length > 50 ? '...' : ''}</div>
-      <div class="text-text-muted text-xs mt-1">v${versionNumber} • ${createdAt}</div>
-    `;
+    item.innerHTML = formatPromptInfo(prompt);
     item.addEventListener('click', () => {
       // Load prompt into editor
       const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
       if (textarea) {
-        textarea.value = content;
+        textarea.value = prompt.content || '';
         updateCharacterCount();
         autoResizeTextarea();
+        // Update predictive save info after loading
+        updatePredictiveSaveInfo();
       }
     });
     promptHistory.appendChild(item);
@@ -248,6 +253,95 @@ function formatRelativeTime(dateString: string): string {
   } else {
     return `${diffDays}d ago`;
   }
+}
+
+/**
+ * Format prompt information for display
+ */
+function formatPromptInfo(prompt: PromptHistoryItem): string {
+  const title = prompt.title || 'Untitled';
+  const versionNumber = prompt.versionNumber;
+  const createdAt = formatRelativeTime(prompt.createdAt || '');
+  const contentPreview = (prompt.content || '').substring(0, 50);
+  const truncated = (prompt.content || '').length > 50 ? '...' : '';
+
+  return `
+    <div class="text-text-primary text-sm truncate font-medium">${title}</div>
+    <div class="text-text-muted text-xs mt-1 truncate">${contentPreview}${truncated}</div>
+    <div class="text-text-muted text-xs mt-1">${prompt.lineageRootId} • v${versionNumber} • ${createdAt}</div>
+  `;
+}
+
+/**
+ * Format predictive save information
+ */
+async function formatPredictiveSaveInfo(): Promise<string> {
+  try {
+    const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+    const content = textarea?.value?.trim() || '';
+
+    if (!content) {
+      return '<div class="text-text-muted text-xs">Enter a prompt to see save preview</div>';
+    }
+
+    // Get the latest prompt to determine next version and lineage
+    const latestPromptResponse = await executeQuery(
+      'SELECT id, version_number, lineage_root_id FROM prompts ORDER BY created_at DESC LIMIT 1',
+      undefined,
+      'resultRows'
+    );
+
+    const latestPrompt = latestPromptResponse.result.resultRows?.[0];
+
+    let nextVersion: number;
+    let changeType: string;
+    let lineageRootId: number;
+
+    if (!latestPrompt) {
+      // First prompt ever
+      nextVersion = 1;
+      changeType = 'initial';
+      lineageRootId = 1;
+    } else {
+      // Next version in the lineage
+      nextVersion = latestPrompt[1] + 1;
+      changeType = 'manual_edit';
+      lineageRootId = latestPrompt[2]; // same lineage as latest
+    }
+
+    // Generate title preview
+    const title = generateTitlePreview(content);
+
+    return `<div class="text-text-muted text-xs">${lineageRootId} • v${nextVersion} • ctrl + enter to save</div>`;
+  } catch (error) {
+    console.error('Error generating predictive save info:', error);
+    return '<div class="text-text-muted text-xs">Unable to preview save info</div>';
+  }
+}
+
+/**
+ * Generate title preview from content
+ */
+function generateTitlePreview(content: string): string {
+  const firstLine = content.split('\n')[0] || '';
+  return firstLine.substring(0, 50) + (firstLine.length > 50 ? '...' : '');
+}
+
+/**
+ * Update predictive save info display
+ */
+export async function updatePredictiveSaveInfo(): Promise<void> {
+  const predictiveInfo = document.getElementById('predictive-save-info');
+  if (!predictiveInfo) return;
+
+  // Check if database is initialized
+  if (!getDatabasePromiser()) {
+    predictiveInfo.innerHTML = '<div class="text-text-muted text-xs">Initializing...</div>';
+    return;
+  }
+
+  const info = await formatPredictiveSaveInfo();
+  predictiveInfo.innerHTML = info;
 }
 
 /**

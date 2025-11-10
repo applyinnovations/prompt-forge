@@ -1,6 +1,6 @@
 import { initDatabase } from './database.js';
 import { showToast } from './toast.js';
-import { initUI, loadAndUpdatePromptHistory, initMethodologyUI } from './ui.js';
+import { initUI, loadAndUpdatePromptHistory, initMethodologyUI, updatePredictiveSaveInfo } from './ui.js';
 
 /**
  * Initialize the application
@@ -33,6 +33,9 @@ async function loadInitialData(): Promise<void> {
 
     // Load prompt history
     await loadAndUpdatePromptHistory();
+
+    // Initialize predictive save info
+    await updatePredictiveSaveInfo();
   } catch (error) {
     console.error('Error loading initial data:', error);
   }
