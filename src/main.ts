@@ -1,10 +1,10 @@
-import { sqlite3Worker1Promiser } from '@sqlite.org/sqlite-wasm';
+import { sqlite3Worker1Promiser, type Promiser } from '@sqlite.org/sqlite-wasm';
 
 async function initDatabase() {
   try {
     console.log('Loading and initializing SQLite3 module...');
 
-    const promiser = await new Promise<any>((resolve) => {
+    const promiser = await new Promise<Promiser>((resolve) => {
       const _promiser = sqlite3Worker1Promiser({
         onready: () => resolve(_promiser),
       });
@@ -33,8 +33,7 @@ async function initDatabase() {
         dbId,
         returnValue: 'resultRows'
       });
-      appliedMigrations = appliedResponse.result.map((row: any) => row[0]);
-      appliedMigrations = appliedResponse.result.map((row: any) => row[0]);
+      appliedMigrations = appliedResponse.result.resultRows?.map((row) => row[0]) || [];
     } catch (error) {
       // Migrations table doesn't exist yet, will be created by init
     }
