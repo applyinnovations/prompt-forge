@@ -50,9 +50,33 @@ function updateCharacterCount() {
   }
 }
 
+// Copy functionality
+function copyPrompt() {
+  const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  const copyButton = document.getElementById('copy-button');
+  if (textarea && copyButton) {
+    navigator.clipboard.writeText(textarea.value).then(() => {
+      // Visual feedback - temporarily change button appearance
+      const originalText = copyButton.innerHTML;
+      copyButton.innerHTML = `
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+      `;
+      setTimeout(() => {
+        copyButton.innerHTML = originalText;
+      }, 1000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }
+}
+
 // Add event listeners to textarea
 document.addEventListener('DOMContentLoaded', () => {
   const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  const copyButton = document.getElementById('copy-button');
+
   if (textarea) {
     textarea.addEventListener('input', () => {
       updateCharacterCount();
@@ -61,5 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial setup
     updateCharacterCount();
     autoResizeTextarea();
+  }
+
+  if (copyButton) {
+    copyButton.addEventListener('click', copyPrompt);
   }
 });
