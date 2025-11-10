@@ -24,7 +24,7 @@ export interface PromptHistoryItem {
 /**
  * Save a prompt with versioning
  */
-export async function savePrompt(content: string): Promise<void> {
+export async function savePrompt(content: string, startNewLineage: boolean = false): Promise<void> {
   if (!content.trim()) {
     return; // Don't save empty prompts
   }
@@ -34,7 +34,7 @@ export async function savePrompt(content: string): Promise<void> {
     const title = generatePromptTitle(content);
 
     // Get versioning information
-    const versioningInfo = await getVersioningInfo();
+    const versioningInfo = await getVersioningInfo(startNewLineage);
 
     // Insert the new prompt version
     await executeQuery(
@@ -70,7 +70,7 @@ function generatePromptTitle(content: string): string {
 /**
  * Get versioning information for a new prompt
  */
-async function getVersioningInfo(): Promise<{
+async function getVersioningInfo(startNewLineage: boolean = false): Promise<{
   changeType: string;
   versionNumber: number;
   parentPromptId: number | null;
@@ -85,13 +85,13 @@ async function getVersioningInfo(): Promise<{
 
   const latestPrompt = latestPromptResponse.result.resultRows?.[0];
 
-  if (!latestPrompt) {
-    // First prompt ever - create initial version
+  if (!latestPrompt || startNewLineage) {
+    // First prompt ever or starting new lineage - create initial version
     return {
       changeType: 'initial',
       versionNumber: 1,
       parentPromptId: null,
-      lineageRootId: 1, // Temporary, will be updated to actual id
+      lineageRootId: startNewLineage && latestPrompt ? latestPrompt[2] + 1 : 1, // Temporary, will be updated to actual id
     };
   } else {
     // Create next version in the lineage

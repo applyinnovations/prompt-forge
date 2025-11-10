@@ -4,6 +4,8 @@ import { loadMethodologies, loadMethodologyTypes, updateMethodologyList, updateM
 import { executeQuery, getDatabasePromiser, wipeDatabase } from './database.js';
 import { showToast } from './toast.js';
 
+let shouldStartNewLineage = false;
+
 /**
  * Initialize UI event listeners
  */
@@ -25,6 +27,10 @@ function setupTextarea(): void {
   textarea.addEventListener('input', () => {
     updateCharacterCount();
     autoResizeTextarea();
+    const content = textarea.value.trim();
+    if (content === '') {
+      shouldStartNewLineage = true;
+    }
     updatePredictiveSaveInfo();
   });
 
@@ -127,7 +133,8 @@ async function handleSavePrompt(): Promise<void> {
   if (!textarea || !saveButton) return;
 
   try {
-    await savePrompt(textarea.value);
+    await savePrompt(textarea.value, shouldStartNewLineage);
+    shouldStartNewLineage = false;
     showButtonSuccess(saveButton);
 
     // Refresh prompt history and predictive save info
@@ -297,11 +304,11 @@ async function formatPredictiveSaveInfo(): Promise<string> {
     let changeType: string;
     let lineageRootId: number;
 
-    if (!latestPrompt) {
-      // First prompt ever
+    if (!latestPrompt || shouldStartNewLineage) {
+      // First prompt ever or starting new lineage
       nextVersion = 1;
       changeType = 'initial';
-      lineageRootId = 1;
+      lineageRootId = shouldStartNewLineage && latestPrompt ? latestPrompt[2] + 1 : 1;
     } else {
       // Next version in the lineage
       nextVersion = latestPrompt[1] + 1;
