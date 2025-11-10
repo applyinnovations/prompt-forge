@@ -136,7 +136,7 @@ async function updateInitialPromptLineage(): Promise<void> {
 /**
  * Load prompt history
  */
-export async function loadPromptHistory(limit: number = 10): Promise<PromptHistoryItem[]> {
+export async function loadPromptHistory(limit: number = 1000): Promise<PromptHistoryItem[]> {
   try {
     const response = await executeQuery(
       'SELECT id, title, content, change_type, version_number, created_at, lineage_root_id, methodology_name FROM prompt_history ORDER BY created_at DESC LIMIT ?',

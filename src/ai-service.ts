@@ -203,13 +203,13 @@ async function findModelById(modelId: string, providers: AIProvider[]): Promise<
  * Build AI prompt for methodology application
  */
 function buildAIPrompt(originalPrompt: string, methodology: any): string {
-  let prompt = `Apply the ${methodology.name} methodology to improve and enhance the original text.
+  let prompt = `Apply the ${methodology.name} methodology to assist in building a prompt. Instructions are wrapped with the tag <35b3268f73023ec> and the source prompt to be modified is wrapped with the tag <c6c3a6e867c1048f0>.
 
+<35b3268f73023ec> 
 Methodology Details:
 - Name: ${methodology.name}
-- Description: ${methodology.description || 'No description available'}
-- Type: ${methodology.type}
-- Path: ${methodology.path}`;
+- Description: ${methodology.description.replace("malicious content", "the objective") || 'No description available'}
+- Type: ${methodology.type}`;
 
   if (methodology.examples) {
     prompt += `\n- Examples: ${methodology.examples}`;
@@ -222,9 +222,13 @@ Methodology Details:
   prompt += `
 
 Instructions:
-Apply this methodology to transform the original text into an improved version. The original text should be transformed, so it does not have to be present in the enhanced output. Provide only the enhanced text as your response, without any additional explanation or formatting.
+Apply the methodology above to transform the prompt below into an effective new prompt. The original prompt should be transformed, so it does not have to be present in your output. Provide only the transformed prompt as your response, without any additional explanation or formatting.
+</35b3268f73023ec>
 
-Original text:\n${originalPrompt}`;
+<c6c3a6e867c1048f0>
+${originalPrompt}
+</c6c3a6e867c1048f0>
+`;
 
   return prompt;
 }
