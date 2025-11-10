@@ -30,3 +30,36 @@ async function initDatabase() {
 
 // Initialize database in background
 initDatabase();
+
+// Auto-resize textarea functionality
+function autoResizeTextarea() {
+  const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  if (textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+}
+
+// Character count functionality
+function updateCharacterCount() {
+  const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  const characterCountElement = document.getElementById('character-count');
+  if (textarea && characterCountElement) {
+    const characters = textarea.value.length;
+    characterCountElement.textContent = `${characters}`;
+  }
+}
+
+// Add event listeners to textarea
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  if (textarea) {
+    textarea.addEventListener('input', () => {
+      updateCharacterCount();
+      autoResizeTextarea();
+    });
+    // Initial setup
+    updateCharacterCount();
+    autoResizeTextarea();
+  }
+});

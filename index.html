@@ -37,11 +37,14 @@
     <!-- Main Content: Prompt Editor -->
     <div class="flex flex-col flex-1 p-4">
       <h2 class="text-terminal-yellow mb-4 font-bold">Prompt Editor</h2>
-      <textarea
-        id="prompt-editor"
-        class="w-full grow bg-terminal-black border border-terminal-green text-terminal-green p-3 font-mono resize-y focus:outline-none focus:border-terminal-green"
-        placeholder="Enter your prompt here..."
-      ></textarea>
+      <div class="relative">
+        <textarea
+          id="prompt-editor"
+          class="w-full bg-terminal-black border border-terminal-green text-terminal-green p-3 font-mono resize-none focus:outline-none focus:border-terminal-green pr-16 min-h-32 overflow-hidden"
+          placeholder="Enter your prompt here..."
+        ></textarea>
+        <div id="character-count" class="absolute bottom-3 right-3 text-terminal-gray-light text-sm pointer-events-none">0</div>
+      </div>
     </div>
 
     <!-- Right Pane: Taxonomy Browser -->
