@@ -2,6 +2,8 @@
  * AI Service for handling model queries and chat completions
  */
 
+import { getApiKeys, updateLastUsedModel } from './api-key-service.js';
+
 export interface AIModel {
   id: string;
   name: string;
@@ -18,7 +20,7 @@ export interface AIProvider {
  * Get available models from all configured AI providers
  */
 export async function getAvailableModels(): Promise<AIModel[]> {
-  const providers = getConfiguredProviders();
+  const providers = await getConfiguredProviders();
   const allModels: AIModel[] = [];
 
   for (const provider of providers) {
@@ -37,33 +39,31 @@ export async function getAvailableModels(): Promise<AIModel[]> {
 /**
  * Get configured AI providers with API keys
  */
-function getConfiguredProviders(): AIProvider[] {
+async function getConfiguredProviders(): Promise<AIProvider[]> {
   const providers: AIProvider[] = [];
+  const apiKeys = await getApiKeys(['openai', 'anthropic', 'xai']);
 
-  const openaiKey = localStorage.getItem('OPENAI_API_KEY');
-  if (openaiKey) {
+  if (apiKeys.openai) {
     providers.push({
       name: 'openai',
       baseUrl: 'https://api.openai.com/v1',
-      apiKey: openaiKey
+      apiKey: apiKeys.openai
     });
   }
 
-  const anthropicKey = localStorage.getItem('ANTHROPIC_API_KEY');
-  if (anthropicKey) {
+  if (apiKeys.anthropic) {
     providers.push({
       name: 'anthropic',
       baseUrl: 'https://api.anthropic.com/v1',
-      apiKey: anthropicKey
+      apiKey: apiKeys.anthropic
     });
   }
 
-  const xaiKey = localStorage.getItem('XAI_API_KEY');
-  if (xaiKey) {
+  if (apiKeys.xai) {
     providers.push({
       name: 'xai',
       baseUrl: 'https://api.x.ai/v1',
-      apiKey: xaiKey
+      apiKey: apiKeys.xai
     });
   }
 
@@ -171,7 +171,7 @@ export async function applyMethodologyToPrompt(
   selectedModel: string,
   onChunk?: (chunk: string) => void
 ): Promise<string> {
-  const providers = getConfiguredProviders();
+  const providers = await getConfiguredProviders();
   const model = await findModelById(selectedModel, providers);
 
   if (!model) {
@@ -182,6 +182,9 @@ export async function applyMethodologyToPrompt(
   if (!provider) {
     throw new Error('Provider not configured');
   }
+
+  // Update last used model
+  await updateLastUsedModel(model.provider, selectedModel);
 
   const aiPrompt = buildAIPrompt(originalPrompt, methodology);
 

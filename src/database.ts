@@ -1,7 +1,8 @@
 import { sqlite3Worker1Promiser, type Promiser } from '@sqlite.org/sqlite-wasm';
 
-// Global database promiser - kept internal to this module
+// Global database promiser and ID - kept internal to this module
 let dbPromiser: Promiser | null = null;
+let dbId: string | null = null;
 
 export interface DatabaseConfig {
   filename: string;
@@ -40,8 +41,8 @@ export async function initDatabase(config: DatabaseConfig = {
     const openResponse = await promiser('open', {
       filename: config.filename,
     });
-    const dbId = openResponse.dbId;
-    if (!dbId) {
+    const currentDbId = openResponse.dbId;
+    if (!currentDbId) {
       throw new Error('Failed to get database ID from open response');
     }
     console.log(
@@ -49,11 +50,12 @@ export async function initDatabase(config: DatabaseConfig = {
       openResponse.result.filename.replace(/^file:(.*?)\?vfs=opfs$/, '$1'),
     );
 
-    // Store the promiser globally for use by other functions
+    // Store the promiser and dbId globally for use by other functions
     dbPromiser = promiser;
+    dbId = currentDbId;
 
     // Run migrations
-    const migrationResult = await runMigrations(promiser, dbId, config.migrationsIndexUrl);
+    const migrationResult = await runMigrations(promiser, currentDbId, config.migrationsIndexUrl);
 
     if (!migrationResult.success) {
       console.warn('Some migrations failed:', migrationResult.failedMigrations);
@@ -160,22 +162,13 @@ export function getDatabasePromiser(): Promiser | null {
  * Execute a database query
  */
 export async function executeQuery(sql: string, bind?: any[], returnValue?: string): Promise<any> {
-  if (!dbPromiser) {
+  if (!dbPromiser || !dbId) {
     throw new Error('Database not initialized');
-  }
-
-  // Get database ID (assuming we have one open)
-  const openResponse = await dbPromiser('open', {
-    filename: 'file:prompt-forge-v0.1.0.db?vfs=opfs',
-  });
-  const dbId = openResponse.dbId;
-  if (!dbId) {
-    throw new Error('Failed to get database ID');
   }
 
   return await dbPromiser('exec', {
     sql,
-    dbId: dbId as string,
+    dbId: dbId,
     bind,
     returnValue
   });
@@ -211,7 +204,7 @@ async function wipeDatabaseInternal(): Promise<void> {
     }
 
     // Drop all tables
-    await dbPromiser('exec', { sql: 'DROP TABLE IF EXISTS methodologies; DROP TABLE IF EXISTS prompts; DROP TABLE IF EXISTS migrations;', dbId: dbId as string });
+    await dbPromiser('exec', { sql: 'DROP TABLE IF EXISTS methodologies; DROP TABLE IF EXISTS prompts; DROP TABLE IF EXISTS ai_providers; DROP TABLE IF EXISTS migrations;', dbId: dbId as string });
     console.log('Database wiped successfully');
   } catch (error) {
     console.error('Error wiping database:', error);

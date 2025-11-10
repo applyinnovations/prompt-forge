@@ -1,5 +1,6 @@
 [
   "20251110_014400_init.sql",
   "20251110_014401_seed.sql",
-  "20251110_014402_fix_lineage_trigger.sql"
+  "20251110_014402_fix_lineage_trigger.sql",
+  "20251110_015000_add_ai_providers.sql"
 ]

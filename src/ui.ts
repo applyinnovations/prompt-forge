@@ -5,6 +5,7 @@ import { executeQuery, getDatabasePromiser } from './database.js';
 import { showToast } from './toast.js';
 import { openSettingsModal, setupModal } from './settings.js';
 import { getAvailableModels, applyMethodologyToPrompt, type AIModel } from './ai-service.js';
+import { getApiKeys, updateLastUsedModel, getAllProviders } from './api-key-service.js';
 
 let shouldStartNewLineage = false;
 
@@ -17,7 +18,8 @@ export function initUI(): void {
     setupButtons();
     setupModal();
     setupMethodologySelect();
-    loadAndUpdateModelSelector();
+    setupModelSelector();
+    // loadAndUpdateModelSelector() is now called after encryption key is set
   });
 }
 
@@ -63,9 +65,9 @@ function setupButtons(): void {
     copyButton.addEventListener('click', copyPrompt);
   }
 
-  if (settingsButton) {
-    settingsButton.addEventListener('click', openSettingsModal);
-  }
+   if (settingsButton) {
+     settingsButton.addEventListener('click', () => openSettingsModal());
+   }
 }
 
 /**
@@ -78,6 +80,26 @@ function setupMethodologySelect(): void {
   methodologySelect.addEventListener('change', () => {
     const type = methodologySelect.value;
     loadMethodologies(type).then(updateMethodologyList);
+  });
+}
+
+/**
+ * Setup model selector event listener
+ */
+function setupModelSelector(): void {
+  const modelSelector = document.getElementById('model-selector') as HTMLSelectElement;
+  if (!modelSelector) return;
+
+  modelSelector.addEventListener('change', async () => {
+    const selectedModel = modelSelector.value;
+    if (selectedModel) {
+      // Find the provider for this model
+      const models = await getAvailableModels();
+      const model = models.find(m => m.id === selectedModel);
+      if (model) {
+        await updateLastUsedModel(model.provider, selectedModel);
+      }
+    }
   });
 }
 
@@ -209,6 +231,7 @@ function updatePromptHistoryList(prompts: PromptHistoryItem[]): void {
       const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
       if (textarea) {
         textarea.value = prompt.content || '';
+        shouldStartNewLineage = false; // Loading from history continues existing lineage
         updateCharacterCount();
         autoResizeTextarea();
         // Update predictive save info after loading
@@ -382,9 +405,8 @@ export async function loadAndUpdateModelSelector(): Promise<void> {
     updateModelSelector(models);
 
     // Check if no API keys are configured
-    const hasAnyApiKey = !!(localStorage.getItem('OPENAI_API_KEY') ||
-                           localStorage.getItem('ANTHROPIC_API_KEY') ||
-                           localStorage.getItem('XAI_API_KEY'));
+    const apiKeys = await getApiKeys(['openai', 'anthropic', 'xai']);
+    const hasAnyApiKey = !!(apiKeys.openai || apiKeys.anthropic || apiKeys.xai);
 
     if (!hasAnyApiKey) {
       showToast('No API keys configured. Please add API keys in settings to use AI features.', 'warning');
@@ -395,6 +417,41 @@ export async function loadAndUpdateModelSelector(): Promise<void> {
     console.error('Failed to load models:', error);
     updateModelSelector([]);
     showToast('Failed to load AI models. Please check your API keys in settings.', 'error');
+  }
+}
+
+/**
+ * Set default model selection to most recently used model
+ */
+async function setDefaultModelSelection(selector: HTMLSelectElement, models: AIModel[]): Promise<void> {
+  if (models.length === 0) return;
+
+  try {
+    // Get all providers with their last used models
+    const providers = await getAllProviders();
+
+    // Filter providers that have a last used model and sort by most recent updated_at
+    const providersWithLastModel = providers
+      .filter(provider => provider.last_used_model)
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+    // Find the most recent model that is still available
+    for (const provider of providersWithLastModel) {
+      const lastModel = models.find(model =>
+        model.id === provider.last_used_model && model.provider === provider.provider_name
+      );
+      if (lastModel) {
+        selector.value = lastModel.id;
+        return;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to get last used model:', error);
+  }
+
+  // Fallback to first available model if no last used model found
+  if (models[0]) {
+    selector.value = models[0].id;
   }
 }
 
@@ -453,8 +510,6 @@ function updateModelSelector(models: AIModel[]): void {
     }
   });
 
-  // Set default selection to first available model
-  if (models.length > 0 && models[0]) {
-    selector.value = models[0].id;
-  }
+  // Set default selection to most recently used model
+  setDefaultModelSelection(selector, models);
 }

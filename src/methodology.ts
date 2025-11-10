@@ -3,6 +3,7 @@ import { applyMethodologyToPrompt } from './ai-service.js';
 import { savePrompt } from './prompt.js';
 import { showToast } from './toast.js';
 import { autoResizeTextarea } from './ui.js';
+import { getApiKeys } from './api-key-service.js';
 
 export interface Methodology {
   id: number;
@@ -104,9 +105,8 @@ async function handleMethodologyApplication(methodology: Methodology): Promise<v
   }
 
   // Check if API keys are configured
-  const hasAnyApiKey = !!(localStorage.getItem('OPENAI_API_KEY') ||
-                         localStorage.getItem('ANTHROPIC_API_KEY') ||
-                         localStorage.getItem('XAI_API_KEY'));
+  const apiKeys = await getApiKeys(['openai', 'anthropic', 'xai']);
+  const hasAnyApiKey = !!(apiKeys.openai || apiKeys.anthropic || apiKeys.xai);
 
   if (!hasAnyApiKey) {
     showToast('No API keys configured. Please add API keys in settings to use AI features.', 'warning');
