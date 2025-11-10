@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS migrations (
 -- No TaxonomyNodes table needed; paths stored directly in Methodologies
 
 -- Create Methodologies table (leaf nodes: narrative_smuggling, jailbreak, etc.)
-CREATE TABLE IF NOT EXISTS Methodologies (
+CREATE TABLE IF NOT EXISTS methodologies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     description TEXT,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Methodologies (
 );
 
 -- Create Prompts table (versioned prompt snapshots)
-CREATE TABLE IF NOT EXISTS Prompts (
+CREATE TABLE IF NOT EXISTS prompts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
     content TEXT NOT NULL,
@@ -50,35 +50,35 @@ CREATE TABLE IF NOT EXISTS Prompts (
 
 -- Indexes for performance
 -- Methodologies indexes (replacing taxonomy hierarchy indexes)
-CREATE INDEX IF NOT EXISTS idx_methodology_path ON Methodologies(path);
-CREATE INDEX IF NOT EXISTS idx_methodology_type ON Methodologies(type);
+CREATE INDEX IF NOT EXISTS idx_methodology_path ON methodologies(path);
+CREATE INDEX IF NOT EXISTS idx_methodology_type ON methodologies(type);
 
 -- Prompt lineage and versioning indexes
-CREATE INDEX IF NOT EXISTS idx_parent_prompt ON Prompts(parent_prompt_id);
-CREATE INDEX IF NOT EXISTS idx_lineage_root ON Prompts(lineage_root_id);
-CREATE INDEX IF NOT EXISTS idx_lineage_root_version ON Prompts(lineage_root_id, version_number);
-CREATE INDEX IF NOT EXISTS idx_methodology ON Prompts(methodology_id);
-CREATE INDEX IF NOT EXISTS idx_change_type ON Prompts(change_type);
-CREATE INDEX IF NOT EXISTS idx_version_number ON Prompts(version_number);
-CREATE INDEX IF NOT EXISTS idx_created_at ON Prompts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_parent_prompt ON prompts(parent_prompt_id);
+CREATE INDEX IF NOT EXISTS idx_lineage_root ON prompts(lineage_root_id);
+CREATE INDEX IF NOT EXISTS idx_lineage_root_version ON prompts(lineage_root_id, version_number);
+CREATE INDEX IF NOT EXISTS idx_methodology ON prompts(methodology_id);
+CREATE INDEX IF NOT EXISTS idx_change_type ON prompts(change_type);
+CREATE INDEX IF NOT EXISTS idx_version_number ON prompts(version_number);
+CREATE INDEX IF NOT EXISTS idx_created_at ON prompts(created_at DESC);
 
 -- Methodology search indexes
-CREATE INDEX IF NOT EXISTS idx_methodology_name ON Methodologies(name);
-CREATE INDEX IF NOT EXISTS idx_methodology_type ON Methodologies(type);
+CREATE INDEX IF NOT EXISTS idx_methodology_name ON methodologies(name);
+CREATE INDEX IF NOT EXISTS idx_methodology_type ON methodologies(type);
 
 -- No initial seeding needed for Methodologies; will be populated from .md files
 
 -- Trigger to auto-update updated_at timestamp
 CREATE TRIGGER IF NOT EXISTS update_methodologies_updated_at
-AFTER UPDATE ON Methodologies
+AFTER UPDATE ON methodologies
 FOR EACH ROW
 WHEN NEW.updated_at = OLD.updated_at
 BEGIN
-    UPDATE Techniques SET updated_at = DATETIME('now') WHERE id = NEW.id;
+    UPDATE methodologies SET updated_at = DATETIME('now') WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS update_prompts_updated_at
-AFTER UPDATE ON Prompts
+AFTER UPDATE ON prompts
 FOR EACH ROW
 WHEN NEW.updated_at = OLD.updated_at
 BEGIN
@@ -87,7 +87,7 @@ END;
 
 -- Trigger to maintain version_number consistency within lineages
 CREATE TRIGGER IF NOT EXISTS validate_prompt_version
-BEFORE INSERT ON Prompts
+BEFORE INSERT ON prompts
 FOR EACH ROW
 BEGIN
     SELECT CASE
@@ -104,7 +104,7 @@ END;
 
 -- Trigger for methodology_id consistency (replaces technique_id trigger logic)
 CREATE TRIGGER IF NOT EXISTS validate_prompt_methodology
-BEFORE INSERT ON Prompts
+BEFORE INSERT ON prompts
 FOR EACH ROW
 BEGIN
     SELECT CASE
@@ -118,14 +118,14 @@ END;
 
 -- Trigger to ensure lineage_root_id consistency
 CREATE TRIGGER IF NOT EXISTS validate_prompt_lineage
-BEFORE INSERT ON Prompts
+BEFORE INSERT ON prompts
 FOR EACH ROW
 BEGIN
     SELECT CASE
         WHEN NEW.change_type = 'initial' AND NEW.lineage_root_id != NEW.id THEN
             RAISE(ABORT, 'Initial prompts must have lineage_root_id = self.id')
         WHEN NEW.change_type != 'initial' AND NEW.lineage_root_id != COALESCE(
-            (SELECT lineage_root_id FROM Prompts WHERE id = NEW.parent_prompt_id),
+            (SELECT lineage_root_id FROM prompts WHERE id = NEW.parent_prompt_id),
             NEW.parent_prompt_id
         ) THEN
             RAISE(ABORT, 'lineage_root_id must match parent or be parent_id for branches')

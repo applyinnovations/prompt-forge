@@ -1,7 +1,8 @@
 # Agent Guidelines for Prompt Forge
 
 ## Build/Test Commands
-- **Full build**: `npm run build` (Vite production build) - Use this to test builds
+- **Type check**: `npm run typecheck` (TypeScript compilation check) - Use this to verify code compiles without errors
+- **Full build**: `npm run build` (Vite production build) - Use this to test complete builds and deployment readiness
 - **Dev server**: `npm run dev` (starts Vite dev server on port 5173) - ⚠️ NEVER RUN: runs indefinitely
 - **Preview**: `npm run preview` (preview production build)
 - **Sync migrations index**: `npm run sync-migrations-index` - Update migrations/index.json after adding/removing migration files
@@ -9,7 +10,9 @@
 
 ### Important Rules
 - **Never run `npm run dev`** - It runs indefinitely and causes developer experience issues
-- **Always use `npm run build`** to test that the site builds correctly
+- **Always run `npm run typecheck`** after making TypeScript changes to ensure code compiles correctly
+- **Use `npm run build`** to test that the site builds correctly for production deployment
+- **NEVER MODIFY EXISTING MIGRATIONS** - Migration files are immutable once created. Create new migration files for any schema changes
 
 ## Database Migrations
 
@@ -38,3 +41,9 @@ When modifying database schema or seeding data:
 - Follow modular architecture: UI and application logic with SQLite WASM data layer
 - Test SQLite WASM functionality in browser environment
 - Use custom CSS variables for terminal color theme
+
+## Icon Usage
+- **Use Heroicons**: Copy SVG code directly from [Heroicons](https://heroicons.com) into the HTML
+- **Consistent styling**: Use `fill="none"`, `viewBox="0 0 24 24"`, `stroke-width="1.5"`, `stroke="currentColor"`, and `class="w-5 h-5"`
+- **Avoid external dependencies**: Never use icon libraries or CDNs - copy the SVG markup directly
+- **Semantic icons**: Choose icons that clearly represent their function (e.g., save icon for saving, copy icon for copying)
