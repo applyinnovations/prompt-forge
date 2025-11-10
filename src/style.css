@@ -3,15 +3,29 @@
 
 @theme {
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --color-terminal-black: #000000;
-  --color-terminal-green: #00CC00;
-  --color-terminal-green-dark: #009900;
-  --color-terminal-gray: #333333;
-  --color-terminal-gray-light: #666666;
-  --color-terminal-white: #FFFFFF;
-  --color-terminal-red: #CC0000;
-  --color-terminal-yellow: #CCCC00;
-  --color-terminal-blue: #0000CC;
-  --color-terminal-cyan: #00CCCC;
-  --color-terminal-magenta: #CC00CC;
+
+  /* Surface colors */
+  --color-surface-primary: #000000;
+  --color-surface-secondary: #111111;
+
+  /* Text colors */
+  --color-text-primary: #00CC00;
+  --color-text-secondary: #009900;
+  --color-text-muted: #666666;
+  --color-text-inverse: #FFFFFF;
+
+  /* Border colors */
+  --color-border-primary: #333333;
+  --color-border-secondary: #444444;
+
+  /* Accent colors */
+  --color-accent-primary: #CCCC00;
+  --color-accent-secondary: #CC0000;
+  --color-accent-tertiary: #0000CC;
+
+  /* Status colors */
+  --color-success: #00CC00;
+  --color-warning: #CCCC00;
+  --color-error: #CC0000;
+  --color-info: #0000CC;
 }
