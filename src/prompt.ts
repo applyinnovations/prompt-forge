@@ -20,6 +20,8 @@ export interface PromptHistoryItem {
   versionNumber: number;
   createdAt: string;
   lineageRootId: number;
+  changeType: string;
+  methodologyName?: string;
 }
 
 /**
@@ -137,7 +139,7 @@ async function updateInitialPromptLineage(): Promise<void> {
 export async function loadPromptHistory(limit: number = 10): Promise<PromptHistoryItem[]> {
   try {
     const response = await executeQuery(
-      'SELECT id, title, content, version_number, created_at, lineage_root_id FROM prompts ORDER BY created_at DESC LIMIT ?',
+      'SELECT id, title, content, change_type, version_number, created_at, lineage_root_id, methodology_name FROM prompt_history ORDER BY created_at DESC LIMIT ?',
       [limit],
       'resultRows'
     );
@@ -146,9 +148,11 @@ export async function loadPromptHistory(limit: number = 10): Promise<PromptHisto
       id: row[0],
       title: row[1] || 'Untitled',
       content: row[2] || '',
-      versionNumber: row[3],
-      createdAt: row[4],
-      lineageRootId: row[5]
+      changeType: row[3],
+      versionNumber: row[4],
+      createdAt: row[5],
+      lineageRootId: row[6],
+      methodologyName: row[7] || undefined
     }));
   } catch (error) {
     console.error('Error loading prompt history:', error);

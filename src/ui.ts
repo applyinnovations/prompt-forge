@@ -254,13 +254,32 @@ function formatPromptInfo(prompt: PromptHistoryItem): string {
   const title = prompt.title || 'Untitled';
   const versionNumber = prompt.versionNumber;
   const createdAt = formatRelativeTime(prompt.createdAt || '');
-  const contentPreview = (prompt.content || '').substring(0, 50);
-  const truncated = (prompt.content || '').length > 50 ? '...' : '';
+  const contentPreview = (prompt.content || '').substring(0, 150);
+  const truncated = (prompt.content || '').length > 150 ? '...' : '';
+
+  // Format change type and methodology info
+  let changeInfo = '';
+  if (prompt.changeType === 'methodology_apply' && prompt.methodologyName) {
+    changeInfo = prompt.methodologyName;
+  } else {
+    changeInfo = prompt.changeType.replace('_', ' ');
+    if (prompt.methodologyName) {
+      changeInfo += ` (${prompt.methodologyName})`;
+    }
+  }
 
   return `
     <div class="text-text-primary text-sm truncate font-medium">${title}</div>
-    <div class="text-text-muted text-xs mt-1 truncate">${contentPreview}${truncated}</div>
-    <div class="text-text-muted text-xs mt-1">${prompt.lineageRootId} • v${versionNumber} • ${createdAt}</div>
+    <div class="text-text-muted text-xs mt-1 line-clamp-3">${contentPreview}${truncated}</div>
+    <div class="text-text-muted text-xs mt-1 flex flex-wrap gap-1">
+      <span>${prompt.lineageRootId}</span>
+      <span>•</span>
+      <span>v${versionNumber}</span>
+      <span>•</span>
+      <span>${createdAt}</span>
+      <span>•</span>
+      <span>${changeInfo}</span>
+    </div>
   `;
 }
 

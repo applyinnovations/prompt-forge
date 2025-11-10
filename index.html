@@ -6,7 +6,7 @@
   <title>Prompt Forge</title>
   <link rel="stylesheet" href="/src/style.css">
 </head>
-<body class="bg-surface-primary min-h-dvh flex flex-col font-mono text-text-primary">
+<body class="bg-surface-primary max-h-dvh overflow-hidden flex flex-col font-mono text-text-primary">
    <!-- Header with ASCII Art Logo -->
     <header class="border-b border-border-primary p-4 relative">
       <button id="settings-button" class="absolute top-4 left-4 text-text-primary hover:text-accent-primary transition-colors p-1" title="Settings">
@@ -26,18 +26,18 @@
      <p class="text-center text-text-secondary mt-2">Advanced Prompt Injection Toolkit</p>
    </header>
 
-  <!-- Main Application Layout -->
-  <div class="flex flex-row grow">
-     <!-- Left Pane: Prompt History -->
-     <div class="w-1/4 border-r border-border-primary p-4">
-       <h2 class="text-accent-primary mb-4 font-bold">Prompt History</h2>
-        <div id="prompt-history" class="space-y-2">
-          <!-- History items will be populated here -->
-        </div>
-     </div>
+   <!-- Main Application Layout -->
+   <div class="flex flex-row grow overflow-hidden">
+      <!-- Left Pane: Prompt History -->
+      <div class="w-1/4 border-r border-border-primary p-4 flex flex-col">
+        <h2 class="text-accent-primary mb-4 font-bold">Prompt History</h2>
+         <div id="prompt-history" class="space-y-2 overflow-y-auto flex-1">
+           <!-- History items will be populated here -->
+         </div>
+      </div>
 
-    <!-- Main Content: Prompt Editor -->
-    <div class="flex flex-col flex-1 p-4">
+     <!-- Main Content: Prompt Editor -->
+     <div class="flex flex-col flex-1 p-4 overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-accent-primary font-bold">Prompt Editor</h2>
          <div class="flex gap-2">
@@ -67,15 +67,15 @@
         </div>
      </div>
 
-      <!-- Right Pane: Methodologies -->
-      <div class="w-1/4 border-l border-border-primary p-4">
-        <h2 class="text-accent-primary mb-4 font-bold">Methodologies</h2>
-        <select id="methodology-select" class="w-full bg-surface-primary border border-border-primary text-text-primary p-2 mb-4 focus:outline-none focus:border-border-secondary">
-        </select>
-        <div id="taxonomy-list" class="space-y-2">
-          <!-- Taxonomy items will be populated here -->
-        </div>
-     </div>
+       <!-- Right Pane: Methodologies -->
+       <div class="w-1/4 border-l border-border-primary p-4 flex flex-col">
+         <h2 class="text-accent-primary mb-4 font-bold">Methodologies</h2>
+         <select id="methodology-select" class="w-full bg-surface-primary border border-border-primary text-text-primary p-2 mb-4 focus:outline-none focus:border-border-secondary">
+         </select>
+         <div id="taxonomy-list" class="space-y-2 overflow-y-auto flex-1">
+           <!-- Taxonomy items will be populated here -->
+         </div>
+      </div>
    </div>
 
     <!-- Settings Modal -->
