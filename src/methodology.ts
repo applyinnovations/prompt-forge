@@ -10,6 +10,8 @@ export interface Methodology {
   description: string;
   path: string;
   type: string;
+  examples?: string;
+  prompt_samples?: string;
 }
 
 /**
@@ -38,7 +40,7 @@ export async function loadMethodologyTypes(): Promise<string[]> {
 export async function loadMethodologies(type: string): Promise<Methodology[]> {
   try {
     const response = await executeQuery(
-      'SELECT id, name, description, path FROM methodologies WHERE type = ? ORDER BY name',
+      'SELECT id, name, description, path, examples, prompt_samples FROM methodologies WHERE type = ? ORDER BY name',
       [type],
       'resultRows'
     );
@@ -48,7 +50,9 @@ export async function loadMethodologies(type: string): Promise<Methodology[]> {
       name: row[1],
       description: row[2] || '',
       path: row[3],
-      type
+      type,
+      examples: row[4] || '',
+      prompt_samples: row[5] || ''
     }));
   } catch (error) {
     console.error('Error loading methodologies:', error);

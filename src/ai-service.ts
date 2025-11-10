@@ -200,12 +200,30 @@ async function findModelById(modelId: string, providers: AIProvider[]): Promise<
  * Build AI prompt for methodology application
  */
 function buildAIPrompt(originalPrompt: string, methodology: any): string {
-  const template = methodology.aiPromptTemplate || `Apply the ${methodology.name} methodology to improve and enhance the following prompt. Provide only the improved prompt as your response:
+  let prompt = `Apply the ${methodology.name} methodology to improve and enhance the original text.
 
-Original prompt: ${originalPrompt}`;
+Methodology Details:
+- Name: ${methodology.name}
+- Description: ${methodology.description || 'No description available'}
+- Type: ${methodology.type}
+- Path: ${methodology.path}`;
 
-  return template.replace('{methodology_name}', methodology.name)
-    .replace('{original_prompt}', originalPrompt);
+  if (methodology.examples) {
+    prompt += `\n- Examples: ${methodology.examples}`;
+  }
+
+  if (methodology.prompt_samples) {
+    prompt += `\n- Sample Prompts: ${methodology.prompt_samples}`;
+  }
+
+  prompt += `
+
+Instructions:
+Apply this methodology to transform the original text into an improved version. Provide only the enhanced text as your response, without any additional explanation or formatting.
+
+Original text:\n${originalPrompt}`;
+
+  return prompt;
 }
 
 /**
