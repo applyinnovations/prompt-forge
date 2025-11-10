@@ -1,9 +1,16 @@
--- migrations/0_init.sql
+-- migrations/20251110_014400_init.sql
 -- Initial database schema for Prompt Forge
 -- Creates all tables with proper constraints, indexes, and relationships
 
 -- Enable foreign key support
 PRAGMA foreign_keys = ON;
+
+-- Migrations tracking table
+CREATE TABLE IF NOT EXISTS migrations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL UNIQUE,
+    applied_at DATETIME DEFAULT (DATETIME('now'))
+);
 
 -- No TaxonomyGroups table needed; paths stored directly in Methodologies
 
@@ -127,14 +134,14 @@ BEGIN
 END;
 
 -- View for easy access to latest prompts per lineage
-CREATE VIEW IF NOT EXISTS LatestPrompts AS
+CREATE VIEW IF NOT EXISTS latest_prompts AS
 SELECT lineage_root_id, MAX(version_number) as latest_version
-FROM Prompts
+FROM prompts
 GROUP BY lineage_root_id;
 
 -- View for prompt history with parent titles (for UI display)
-CREATE VIEW IF NOT EXISTS PromptHistory AS
-SELECT 
+CREATE VIEW IF NOT EXISTS prompt_history AS
+SELECT
     p.id,
     p.title,
     p.content,
@@ -146,7 +153,7 @@ SELECT
     m.name as methodology_name,
     m.type as methodology_type,
     m.path as methodology_path
-FROM Prompts p
-LEFT JOIN Prompts parent ON p.parent_prompt_id = parent.id
-LEFT JOIN Methodologies m ON p.methodology_id = m.id
+FROM prompts p
+LEFT JOIN prompts parent ON p.parent_prompt_id = parent.id
+LEFT JOIN methodologies m ON p.methodology_id = m.id
 ORDER BY p.lineage_root_id, p.version_number;

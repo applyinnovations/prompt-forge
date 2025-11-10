@@ -21,6 +21,60 @@ async function initDatabase() {
       openResponse.result.filename.replace(/^file:(.*?)\?vfs=opfs$/, '$1'),
     );
 
+    // Get list of migrations
+    const indexResponse = await fetch('/migrations/index.json');
+    const migrationFiles: string[] = await indexResponse.json();
+
+    // Get applied migrations
+    let appliedMigrations: string[] = [];
+    try {
+      const appliedResponse = await promiser('exec', {
+        sql: 'SELECT filename FROM migrations',
+        dbId,
+        returnValue: 'resultRows'
+      });
+      appliedMigrations = appliedResponse.result.map((row: any) => row[0]);
+      appliedMigrations = appliedResponse.result.map((row: any) => row[0]);
+    } catch (error) {
+      // Migrations table doesn't exist yet, will be created by init
+    }
+
+    // Run pending migrations
+    for (const filename of migrationFiles) {
+      if (!appliedMigrations.includes(filename)) {
+        console.log(`Applying migration: ${filename}`);
+        const response = await fetch(`/migrations/${filename}`);
+        const sql = await response.text();
+
+        // Run migration and record in transaction
+        await promiser('exec', { sql: 'BEGIN', dbId });
+        try {
+          await promiser('exec', { sql, dbId });
+          await promiser('exec', {
+            sql: 'INSERT INTO migrations (filename) VALUES (?)',
+            dbId,
+            bind: [filename]
+          });
+          await promiser('exec', { sql: 'COMMIT', dbId });
+          console.log(`Migration applied: ${filename}`);
+        } catch (error) {
+          await promiser('exec', { sql: 'ROLLBACK', dbId });
+          const wipe = confirm(`Migration ${filename} failed. Wipe database and reload?`);
+          if (wipe) {
+            // Wipe database by dropping all tables
+            try {
+              await promiser('exec', { sql: 'DROP TABLE IF EXISTS methodologies; DROP TABLE IF EXISTS prompts; DROP TABLE IF EXISTS migrations;', dbId });
+            } catch (dropError) {
+              console.error('Failed to drop tables:', dropError);
+            }
+            location.reload();
+          } else {
+            console.error(`Migration ${filename} failed, continuing...`);
+          }
+        }
+      }
+    }
+
     console.log('Database initialized successfully');
 
   } catch (error) {

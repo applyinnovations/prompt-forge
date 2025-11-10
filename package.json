@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync-migrations-index": "node scripts/sync-migrations-index.js"
   },
   "keywords": [],
   "author": "",
@@ -15,10 +16,11 @@
   "type": "commonjs",
   "devDependencies": {
     "typescript": "^5.9.3",
-    "vite": "^7.2.2"
+    "vite": "^7.2.2",
+    "vite-plugin-static-copy": "^3.1.4"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.17",
-    "@sqlite.org/sqlite-wasm": "3.51.0-build1"
+    "@sqlite.org/sqlite-wasm": "3.51.0-build1",
+    "@tailwindcss/vite": "^4.1.17"
   }
 }

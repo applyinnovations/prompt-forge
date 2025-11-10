@@ -27,9 +27,39 @@ The project currently has:
 - ✅ Basic Vite + TypeScript setup with TailwindCSS styling
 - ✅ SQLite WASM integration with OPFS for local storage
 - ✅ Terminal-themed UI foundation
+- ✅ Database migrations system for schema and data updates
 - 🚧 Interactive prompt building interface (planned)
 - 🚧 Taxonomy integration features (planned)
 - 🚧 Attack simulation tools (planned)
+
+## Database Migrations
+
+Prompt Forge uses a migration system to manage database schema and data changes. Migrations are SQL files in the `migrations/` directory, executed in alphabetical order on app startup.
+
+### Writing a Migration
+
+1. Create a new SQL file in `migrations/` with timestamp naming: `YYYYMMDD_HHMMSS_description.sql`
+2. Write valid SQLite SQL statements (CREATE, ALTER, INSERT, etc.)
+3. Do not include `BEGIN TRANSACTION;` or `COMMIT;` - the system handles transactions
+4. Test the migration by running `npm run build` and loading the app
+
+Example migration file (`20251110_014400_init.sql`):
+```sql
+-- Create tables
+CREATE TABLE methodologies (...);
+-- Add indexes
+CREATE INDEX ...;
+```
+
+### Syncing Migration Index
+
+After adding or removing migration files, update the index:
+
+```bash
+npm run sync-migrations-index
+```
+
+This updates `migrations/index.json` with the sorted list of migration files.
 
 ## Installation
 
