@@ -9,9 +9,10 @@
 <body class="bg-surface-primary min-h-dvh flex flex-col font-mono text-text-primary">
    <!-- Header with ASCII Art Logo -->
     <header class="border-b border-border-primary p-4 relative">
-      <button id="wipe-db-button" class="absolute top-4 left-4 text-text-primary hover:text-error transition-colors p-1" title="Wipe Database">
+      <button id="settings-button" class="absolute top-4 left-4 text-text-primary hover:text-accent-primary transition-colors p-1" title="Settings">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
         </svg>
       </button>
       <pre class="text-text-primary text-center">
@@ -69,8 +70,40 @@
      </div>
    </div>
 
-   <!-- Toast Notifications -->
-   <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/75 hidden z-50 flex items-center justify-center">
+      <div class="bg-surface-primary border border-border-primary rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-text-primary text-lg font-bold">Settings</h3>
+          <button id="close-settings-modal" class="text-text-muted hover:text-text-primary">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <form id="api-keys-form" class="space-y-4">
+          <div>
+            <label for="xai-api-key" class="block text-text-primary text-sm font-medium mb-1">XAI API Key</label>
+            <input type="password" id="xai-api-key" class="w-full bg-surface-primary border border-border-primary text-text-primary p-2 rounded focus:outline-none focus:border-border-secondary" placeholder="Enter XAI API Key">
+          </div>
+          <div>
+            <label for="openai-api-key" class="block text-text-primary text-sm font-medium mb-1">OpenAI API Key</label>
+            <input type="password" id="openai-api-key" class="w-full bg-surface-primary border border-border-primary text-text-primary p-2 rounded focus:outline-none focus:border-border-secondary" placeholder="Enter OpenAI API Key">
+          </div>
+          <div>
+            <label for="anthropic-api-key" class="block text-text-primary text-sm font-medium mb-1">Anthropic API Key</label>
+            <input type="password" id="anthropic-api-key" class="w-full bg-surface-primary border border-border-primary text-text-primary p-2 rounded focus:outline-none focus:border-border-secondary" placeholder="Enter Anthropic API Key">
+          </div>
+          <button type="submit" class="w-full bg-black text-white border border-green-500 py-2 px-4 rounded hover:bg-gray-800 transition-colors">Save API Keys</button>
+        </form>
+        <div class="mt-6 pt-4 border-t border-border-primary">
+          <button id="wipe-db-modal-button" class="w-full bg-black text-white border border-red-500 py-2 px-4 rounded hover:bg-gray-800 transition-colors">Wipe Database</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
    <script type="module" src="/src/main.ts"></script>
 </body>

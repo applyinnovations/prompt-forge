@@ -1,8 +1,9 @@
 import { savePrompt, loadPromptHistory } from './prompt.js';
 import type { PromptHistoryItem } from './prompt.js';
 import { loadMethodologies, loadMethodologyTypes, updateMethodologyList, updateMethodologySelect } from './methodology.js';
-import { executeQuery, getDatabasePromiser, wipeDatabase } from './database.js';
+import { executeQuery, getDatabasePromiser } from './database.js';
 import { showToast } from './toast.js';
+import { openSettingsModal, setupModal } from './settings.js';
 
 let shouldStartNewLineage = false;
 
@@ -13,6 +14,7 @@ export function initUI(): void {
   document.addEventListener('DOMContentLoaded', () => {
     setupTextarea();
     setupButtons();
+    setupModal();
     setupMethodologySelect();
   });
 }
@@ -53,14 +55,14 @@ function setupTextarea(): void {
  */
 function setupButtons(): void {
   const copyButton = document.getElementById('copy-button');
-  const wipeDbButton = document.getElementById('wipe-db-button');
+  const settingsButton = document.getElementById('settings-button');
 
   if (copyButton) {
     copyButton.addEventListener('click', copyPrompt);
   }
 
-  if (wipeDbButton) {
-    wipeDbButton.addEventListener('click', handleWipeDatabase);
+  if (settingsButton) {
+    settingsButton.addEventListener('click', openSettingsModal);
   }
 }
 
@@ -138,19 +140,7 @@ async function handleSavePrompt(): Promise<void> {
   }
 }
 
-/**
- * Handle wipe database button click
- */
-async function handleWipeDatabase(): Promise<void> {
-  try {
-    await wipeDatabase();
-    showToast('Database wiped successfully, reloading...', 'warning');
-    location.reload();
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
-    showToast(`Failed to wipe database: ${errorMessage}`, 'error');
-  }
-}
+
 
 /**
  * Show success state on button
