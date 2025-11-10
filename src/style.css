@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: 'Courier New', monospace;
+  --color-terminal-black: #000000;
+  --color-terminal-green: #00CC00;
+  --color-terminal-green-dark: #009900;
+  --color-terminal-gray: #333333;
+  --color-terminal-gray-light: #666666;
+  --color-terminal-white: #FFFFFF;
+  --color-terminal-red: #CC0000;
+  --color-terminal-yellow: #CCCC00;
+  --color-terminal-blue: #0000CC;
+  --color-terminal-cyan: #00CCCC;
+  --color-terminal-magenta: #CC00CC;
+}

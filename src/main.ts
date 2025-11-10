@@ -24,7 +24,7 @@ async function init() {
     // Update UI
     const status = document.getElementById('status');
     if (status) {
-      status.innerHTML = '<p>Application loaded successfully! Database connected.</p>';
+      status.innerHTML = '<p class="text-terminal-green">Application loaded successfully! Database connected.</p>';
     }
 
     // TODO: Add application logic here
@@ -33,7 +33,7 @@ async function init() {
     console.error('Error loading application:', error);
     const status = document.getElementById('status');
     if (status) {
-      status.innerHTML = '<p>Error loading application: ' + (error as Error).message + '</p>';
+      status.innerHTML = '<p class="text-terminal-red">Error loading application: ' + (error as Error).message + '</p>';
     }
   }
 }

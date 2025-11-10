@@ -1,17 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background-color: #000000;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prompt-Forge</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/style.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="text-center">
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">Prompt-Forge</h1>
-    <p class="text-gray-600">Loading WASM modules...</p>
-    <div id="status"></div>
+<body class="bg-terminal-black min-h-screen flex items-center justify-center font-mono">
+  <div class="text-center border border-terminal-green p-8 rounded">
+    <h1 class="text-4xl font-bold text-terminal-green mb-4">Prompt-Forge</h1>
+    <p class="text-terminal-green-dark">Loading WASM modules...</p>
+    <div id="status" class="text-terminal-green mt-4"></div>
   </div>
-   <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
