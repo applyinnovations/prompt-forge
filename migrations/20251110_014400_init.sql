@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS prompts (
     content TEXT NOT NULL,
     parent_prompt_id INTEGER,
     methodology_id INTEGER,
-    change_type TEXT NOT NULL CHECK(change_type IN ('initial', 'manual_edit', 'technique_apply')),
+    change_type TEXT NOT NULL CHECK(change_type IN ('initial', 'manual_edit', 'methodology_apply')),
     metadata TEXT,  -- JSON: {intent: "...", evasion: "...", status: "..."}
     version_number INTEGER NOT NULL,
     lineage_root_id INTEGER NOT NULL,
@@ -102,16 +102,16 @@ BEGIN
     END;
 END;
 
--- Trigger for methodology_id consistency (replaces technique_id trigger logic)
+-- Trigger for methodology_id consistency
 CREATE TRIGGER IF NOT EXISTS validate_prompt_methodology
 BEFORE INSERT ON prompts
 FOR EACH ROW
 BEGIN
     SELECT CASE
-        WHEN NEW.change_type = 'technique_apply' AND NEW.methodology_id IS NULL THEN
-            RAISE(ABORT, 'technique_apply requires methodology_id')
-        WHEN NEW.change_type != 'technique_apply' AND NEW.methodology_id IS NOT NULL THEN
-            RAISE(ABORT, 'Only technique_apply can have methodology_id')
+        WHEN NEW.change_type = 'methodology_apply' AND NEW.methodology_id IS NULL THEN
+            RAISE(ABORT, 'methodology_apply requires methodology_id')
+        WHEN NEW.change_type != 'methodology_apply' AND NEW.methodology_id IS NOT NULL THEN
+            RAISE(ABORT, 'Only methodology_apply can have methodology_id')
         ELSE 1
     END;
 END;

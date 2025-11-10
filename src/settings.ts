@@ -1,5 +1,6 @@
 import { wipeDatabase } from './database.js';
 import { showToast } from './toast.js';
+import { loadAndUpdateModelSelector } from './ui.js';
 
 /**
  * Open settings modal
@@ -42,7 +43,7 @@ function loadApiKeys(): void {
 /**
  * Save API keys to localStorage
  */
-function saveApiKeys(): void {
+async function saveApiKeys(): Promise<void> {
   const xaiInput = document.getElementById('xai-api-key') as HTMLInputElement;
   const openaiInput = document.getElementById('openai-api-key') as HTMLInputElement;
   const anthropicInput = document.getElementById('anthropic-api-key') as HTMLInputElement;
@@ -52,6 +53,10 @@ function saveApiKeys(): void {
   if (anthropicInput) localStorage.setItem('ANTHROPIC_API_KEY', anthropicInput.value);
 
   showToast('API keys saved successfully', 'success');
+
+  // Reload models after saving API keys
+  await loadAndUpdateModelSelector();
+
   closeSettingsModal();
 }
 

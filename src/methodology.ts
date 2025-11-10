@@ -1,5 +1,8 @@
 import { executeQuery } from './database.js';
+import { applyMethodologyToPrompt } from './ai-service.js';
+import { savePrompt } from './prompt.js';
 import { showToast } from './toast.js';
+import { autoResizeTextarea } from './ui.js';
 
 export interface Methodology {
   id: number;
@@ -72,6 +75,99 @@ export function updateMethodologySelect(types: string[]): void {
 }
 
 /**
+ * Handle methodology application with AI
+ */
+async function handleMethodologyApplication(methodology: Methodology): Promise<void> {
+  const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+  const modelSelector = document.getElementById('model-selector') as HTMLSelectElement;
+
+  if (!textarea || !modelSelector) {
+    showToast('UI elements not found', 'error');
+    return;
+  }
+
+  const currentPrompt = textarea.value.trim();
+  const selectedModel = modelSelector.value;
+
+  if (!currentPrompt) {
+    showToast('Please enter a prompt first', 'warning');
+    return;
+  }
+
+  if (!selectedModel) {
+    showToast('Please select an AI model', 'warning');
+    return;
+  }
+
+  // Check if API keys are configured
+  const hasAnyApiKey = !!(localStorage.getItem('OPENAI_API_KEY') ||
+                         localStorage.getItem('ANTHROPIC_API_KEY') ||
+                         localStorage.getItem('XAI_API_KEY'));
+
+  if (!hasAnyApiKey) {
+    showToast('No API keys configured. Please add API keys in settings to use AI features.', 'warning');
+    return;
+  }
+
+  try {
+    // Save current version as manual_edit
+    await savePrompt(currentPrompt, false, 'manual_edit');
+
+    // Show loading state
+    textarea.disabled = true;
+    modelSelector.disabled = true;
+    textarea.value = 'Applying methodology...';
+    textarea.style.opacity = '0.7';
+
+    // Apply methodology with AI
+    let isFirstChunk = true;
+    const result = await applyMethodologyToPrompt(
+      currentPrompt,
+      methodology,
+      selectedModel,
+      (chunk) => {
+        // Handle streaming chunks
+        if (isFirstChunk) {
+          // Replace the "Applying methodology..." placeholder with the first chunk
+          textarea.value = chunk;
+          isFirstChunk = false;
+        } else {
+          // Append subsequent chunks
+          textarea.value += chunk;
+        }
+        // Auto-resize textarea as content grows
+        autoResizeTextarea();
+      }
+    );
+
+    // Save the AI-generated result
+    await savePrompt(result, false, 'methodology_apply', methodology.id);
+
+    showToast(`Applied ${methodology.name} methodology successfully`, 'success');
+
+  } catch (error) {
+    console.error('Methodology application failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    showToast(`Failed to apply methodology: ${errorMessage}`, 'error');
+
+    // Restore original prompt on error
+    textarea.value = currentPrompt;
+  } finally {
+    // Restore UI state
+    const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
+    const modelSelector = document.getElementById('model-selector') as HTMLSelectElement;
+
+    if (textarea) {
+      textarea.disabled = false;
+      textarea.style.opacity = '1';
+    }
+    if (modelSelector) {
+      modelSelector.disabled = false;
+    }
+  }
+}
+
+/**
  * Update methodology list in UI
  */
 export function updateMethodologyList(methodologies: Methodology[]): void {
@@ -92,9 +188,8 @@ export function updateMethodologyList(methodologies: Methodology[]): void {
       <div class="text-text-primary text-sm font-medium">${methodology.name}</div>
       <div class="text-text-muted text-xs mt-1">${methodology.description || 'No description'}</div>
     `;
-    item.addEventListener('click', () => {
-      // TODO: Handle methodology selection
-      console.log('Selected methodology:', methodology);
+    item.addEventListener('click', async () => {
+      await handleMethodologyApplication(methodology);
     });
     methodologyList.appendChild(item);
   });

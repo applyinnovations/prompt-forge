@@ -4,6 +4,7 @@ import { loadMethodologies, loadMethodologyTypes, updateMethodologyList, updateM
 import { executeQuery, getDatabasePromiser } from './database.js';
 import { showToast } from './toast.js';
 import { openSettingsModal, setupModal } from './settings.js';
+import { getAvailableModels, applyMethodologyToPrompt, type AIModel } from './ai-service.js';
 
 let shouldStartNewLineage = false;
 
@@ -16,6 +17,7 @@ export function initUI(): void {
     setupButtons();
     setupModal();
     setupMethodologySelect();
+    loadAndUpdateModelSelector();
   });
 }
 
@@ -82,7 +84,7 @@ function setupMethodologySelect(): void {
 /**
  * Auto-resize textarea functionality
  */
-function autoResizeTextarea(): void {
+export function autoResizeTextarea(): void {
   const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
   if (textarea) {
     textarea.style.height = 'auto';
@@ -349,5 +351,91 @@ export async function initMethodologyUI(): Promise<void> {
     }
   } catch (error) {
     // Error already handled in the functions
+  }
+}
+
+/**
+ * Load and update model selector
+ */
+export async function loadAndUpdateModelSelector(): Promise<void> {
+  try {
+    const models = await getAvailableModels();
+    updateModelSelector(models);
+
+    // Check if no API keys are configured
+    const hasAnyApiKey = !!(localStorage.getItem('OPENAI_API_KEY') ||
+                           localStorage.getItem('ANTHROPIC_API_KEY') ||
+                           localStorage.getItem('XAI_API_KEY'));
+
+    if (!hasAnyApiKey) {
+      showToast('No API keys configured. Please add API keys in settings to use AI features.', 'warning');
+    } else if (models.length === 0) {
+      showToast('Failed to load AI models. Please check your API keys in settings.', 'error');
+    }
+  } catch (error) {
+    console.error('Failed to load models:', error);
+    updateModelSelector([]);
+    showToast('Failed to load AI models. Please check your API keys in settings.', 'error');
+  }
+}
+
+/**
+ * Update model selector with available models
+ */
+function updateModelSelector(models: AIModel[]): void {
+  const selector = document.getElementById('model-selector') as HTMLSelectElement;
+  if (!selector) return;
+
+  selector.innerHTML = '';
+
+  if (models.length === 0) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No models available';
+    selector.appendChild(option);
+    return;
+  }
+
+  // Add default option
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = 'Select a model...';
+  selector.appendChild(defaultOption);
+
+  // Group models by provider
+  const modelsByProvider: { [key: string]: AIModel[] } = {};
+  models.forEach(model => {
+    const provider = model.provider;
+    if (provider) {
+      if (!modelsByProvider[provider]) {
+        modelsByProvider[provider] = [];
+      }
+      modelsByProvider[provider].push(model);
+    }
+  });
+
+  // Add options grouped by provider
+  Object.keys(modelsByProvider).forEach(provider => {
+    const providerModels = modelsByProvider[provider];
+    if (providerModels) {
+      // Add provider group header (disabled option)
+      const groupOption = document.createElement('option');
+      groupOption.disabled = true;
+      groupOption.textContent = `--- ${provider.toUpperCase()} ---`;
+      selector.appendChild(groupOption);
+
+      // Add provider models
+      providerModels.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.textContent = model.name;
+        selector.appendChild(option);
+      });
+    }
+  });
+
+  // Set default selection to first available model
+  if (models.length > 0 && models[0]) {
+    selector.value = models[0].id;
   }
 }

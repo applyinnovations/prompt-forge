@@ -55,9 +55,17 @@
            placeholder="Enter your prompt here..."
          ></textarea>
          <div id="character-count" class="absolute bottom-3 right-3 text-text-muted text-sm pointer-events-none">0</div>
-       </div>
-       <div id="predictive-save-info" class="mt-2"></div>
-    </div>
+        </div>
+        <div class="flex justify-between items-center mt-2">
+          <div id="predictive-save-info"></div>
+          <div class="flex items-center gap-2">
+            <label for="model-selector" class="text-text-primary text-sm">Model:</label>
+            <select id="model-selector" class="bg-surface-primary border border-border-primary text-text-primary p-1 text-sm focus:outline-none focus:border-border-secondary min-w-32">
+              <option value="">Loading models...</option>
+            </select>
+          </div>
+        </div>
+     </div>
 
       <!-- Right Pane: Methodologies -->
       <div class="w-1/4 border-l border-border-primary p-4">

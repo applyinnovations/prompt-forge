@@ -1,5 +1,6 @@
 import { executeQuery } from './database.js';
 import { showToast } from './toast.js';
+import { loadAndUpdatePromptHistory } from './ui.js';
 
 export interface Prompt {
   id: number;
@@ -24,7 +25,7 @@ export interface PromptHistoryItem {
 /**
  * Save a prompt with versioning
  */
-export async function savePrompt(content: string, startNewLineage: boolean = false): Promise<void> {
+export async function savePrompt(content: string, startNewLineage: boolean = false, changeType?: string, methodologyId?: number): Promise<void> {
   if (!content.trim()) {
     return; // Don't save empty prompts
   }
@@ -34,12 +35,12 @@ export async function savePrompt(content: string, startNewLineage: boolean = fal
     const title = generatePromptTitle(content);
 
     // Get versioning information
-    const versioningInfo = await getVersioningInfo(startNewLineage);
+    const versioningInfo = await getVersioningInfo(startNewLineage, changeType);
 
     // Insert the new prompt version
     await executeQuery(
-      'INSERT INTO prompts (title, content, parent_prompt_id, change_type, version_number, lineage_root_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, content, versioningInfo.parentPromptId, versioningInfo.changeType, versioningInfo.versionNumber, versioningInfo.lineageRootId]
+      'INSERT INTO prompts (title, content, parent_prompt_id, methodology_id, change_type, version_number, lineage_root_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [title, content, versioningInfo.parentPromptId, methodologyId || null, versioningInfo.changeType, versioningInfo.versionNumber, versioningInfo.lineageRootId]
     );
 
     // For initial prompts, update lineage_root_id to reference itself
@@ -50,6 +51,9 @@ export async function savePrompt(content: string, startNewLineage: boolean = fal
     // Show success toast with version info
     const versionInfo = versioningInfo.changeType === 'initial' ? 'as initial version' : `as version ${versioningInfo.versionNumber}`;
     showToast(`Prompt saved successfully ${versionInfo}`, 'success');
+
+    // Update prompt history UI
+    await loadAndUpdatePromptHistory();
 
   } catch (error) {
     console.error('Error saving prompt:', error);
@@ -70,7 +74,7 @@ function generatePromptTitle(content: string): string {
 /**
  * Get versioning information for a new prompt
  */
-async function getVersioningInfo(startNewLineage: boolean = false): Promise<{
+async function getVersioningInfo(startNewLineage: boolean = false, changeType?: string): Promise<{
   changeType: string;
   versionNumber: number;
   parentPromptId: number | null;
@@ -85,18 +89,26 @@ async function getVersioningInfo(startNewLineage: boolean = false): Promise<{
 
   const latestPrompt = latestPromptResponse.result.resultRows?.[0];
 
-  if (!latestPrompt || startNewLineage) {
-    // First prompt ever or starting new lineage - create initial version
+  if (!latestPrompt) {
+    // First prompt ever - always create initial version
     return {
       changeType: 'initial',
       versionNumber: 1,
       parentPromptId: null,
-      lineageRootId: startNewLineage && latestPrompt ? latestPrompt[2] + 1 : 1, // Temporary, will be updated to actual id
+      lineageRootId: 1, // Temporary, will be updated to actual id
+    };
+  } else if (startNewLineage) {
+    // Starting new lineage - create initial version in new lineage
+    return {
+      changeType: 'initial',
+      versionNumber: 1,
+      parentPromptId: null,
+      lineageRootId: latestPrompt[2] + 1, // New lineage
     };
   } else {
-    // Create next version in the lineage
+    // Create next version in the current lineage
     return {
-      changeType: 'manual_edit',
+      changeType: changeType || 'manual_edit',
       versionNumber: latestPrompt[1] + 1, // parent version_number + 1
       parentPromptId: latestPrompt[0], // parent id
       lineageRootId: latestPrompt[2], // same lineage_root_id as parent

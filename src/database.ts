@@ -83,6 +83,13 @@ async function runMigrations(promiser: Promiser, dbId: string, migrationsIndexUr
     const indexResponse = await fetch(migrationsIndexUrl);
     const migrationFiles: string[] = await indexResponse.json();
 
+    // Sort migrations by timestamp to ensure they run in chronological order
+    migrationFiles.sort((a, b) => {
+      const timestampA = a.match(/^(\d{8}_\d{6})/)?.[1] || '';
+      const timestampB = b.match(/^(\d{8}_\d{6})/)?.[1] || '';
+      return timestampA.localeCompare(timestampB);
+    });
+
     // Get applied migrations
     let appliedMigrations: string[] = [];
     try {
