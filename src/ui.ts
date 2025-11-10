@@ -53,15 +53,10 @@ function setupTextarea(): void {
  */
 function setupButtons(): void {
   const copyButton = document.getElementById('copy-button');
-  const saveButton = document.getElementById('save-button');
   const wipeDbButton = document.getElementById('wipe-db-button');
 
   if (copyButton) {
     copyButton.addEventListener('click', copyPrompt);
-  }
-
-  if (saveButton) {
-    saveButton.addEventListener('click', handleSavePrompt);
   }
 
   if (wipeDbButton) {
@@ -124,24 +119,22 @@ function copyPrompt(): void {
 }
 
 /**
- * Handle save prompt button click
+ * Handle save prompt (via Ctrl+Enter)
  */
 async function handleSavePrompt(): Promise<void> {
   const textarea = document.getElementById('prompt-editor') as HTMLTextAreaElement;
-  const saveButton = document.getElementById('save-button');
 
-  if (!textarea || !saveButton) return;
+  if (!textarea) return;
 
   try {
     await savePrompt(textarea.value, shouldStartNewLineage);
     shouldStartNewLineage = false;
-    showButtonSuccess(saveButton);
 
     // Refresh prompt history and predictive save info
     await loadAndUpdatePromptHistory();
     await updatePredictiveSaveInfo();
   } catch (error) {
-    showButtonError(saveButton);
+    // Error already handled in savePrompt
   }
 }
 
