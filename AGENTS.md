@@ -6,13 +6,13 @@
 - **Dev server**: `npm run dev` (starts Vite dev server on port 5173) - ⚠️ NEVER RUN: runs indefinitely
 - **Preview**: `npm run preview` (preview production build)
 - **Sync migrations index**: `npm run sync-migrations-index` - Update migrations/index.json after adding/removing migration files
-- **No tests configured**: Add test scripts to package.json when implementing tests
+- **Type checking**: `npm run typecheck` - Run TypeScript compiler to check for type errors
 
 ### Important Rules
-- **Never run `npm run dev`** - It runs indefinitely and causes developer experience issues
 - **Always run `npm run typecheck`** after making TypeScript changes to ensure code compiles correctly
 - **Use `npm run build`** to test that the site builds correctly for production deployment
 - **NEVER MODIFY EXISTING MIGRATIONS** - Migration files are immutable once created. Create new migration files for any schema changes
+- **Test database changes** with `npm run build` - Migrations run automatically on app initialization
 
 ## Database Migrations
 
