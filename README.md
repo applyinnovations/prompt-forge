@@ -4,7 +4,7 @@
   <img src="images/demo.gif" alt="Prompt Forge Demo" />
 </p>
 
-Prompt Forge is an open-source tool designed for researchers, penetration testers, and ethical hackers to iteratively modify, construct, and evolve prompt injection attacks. It leverages the structured techniques and taxonomies from the Arc PI Taxonomy to facilitate the development and testing of adversarial prompts against AI systems.
+Prompt Forge is an open-source tool designed for researchers, penetration testers, and ethical hackers to iteratively modify, construct, and evolve prompt injection attacks. It leverages the structured techniques and taxonomies from the [Arc PI Taxonomy](https://github.com/Arcanum-Sec/arc_pi_taxonomy/) to facilitate the development and testing of adversarial prompts against AI systems.
 
 ## Features
 
@@ -12,34 +12,10 @@ Prompt Forge is an open-source tool designed for researchers, penetration tester
 - **Taxonomy Integration**: Built on the Arc PI Taxonomy with categorized attack techniques, intents, methods, and evasions loaded from a comprehensive database.
 - **AI-Powered Methodology Application**: Apply predefined or custom methodologies using OpenAI, Anthropic, or XAI models to evolve prompts intelligently.
 - **Prompt Versioning & Lineage Tracking**: Automatic versioning system with lineage tracking, allowing you to see the evolution of your prompts over time.
-- **Local Encrypted Storage**: All data stored locally in the browser using SQLite WASM, with API credentials encrypted using the key provided on page load.
+- **Local Encrypted Storage**: All data stored locally using SQLite WASM with OPFS, credentials are encrypted using AES-256 with the in-memory key provided at login.
 - **Model Selection**: Choose from multiple AI providers and models for methodology application.
 - **Prompt History**: Browse and restore previous prompt versions with detailed metadata.
 - **Ethical Use Only**: Intended solely for security research and defensive purposes.
-
-## Project Architecture
-
-Prompt-Forge runs entirely in the browser for security and portability. The architecture is modular:
-
-- **UI Layer**: Vanilla web interface built with TypeScript, HTML, and CSS using Vite for development tooling. Handles user interactions and renders the application.
-- **Application Logic Layer**: Core functionality implemented in JavaScript using SQLite WASM for database operations.
-- **Data Layer**: SQLite database with Origin Private File System (OPFS) for persistent local storage in the browser.
-
-This design ensures all logic runs client-side with no server dependencies.
-
-## Development Status
-
-The project is fully functional with:
-- ✅ Complete Vite + TypeScript setup with TailwindCSS styling
-- ✅ SQLite WASM integration with OPFS for persistent local storage
-- ✅ Terminal-themed UI with responsive design
-- ✅ Database migrations system for schema and data updates
-- ✅ Interactive prompt builder with real-time editing
-- ✅ Full taxonomy integration with Arc PI methodologies
-- ✅ AI-powered prompt evolution using multiple providers
-- ✅ Prompt versioning and lineage tracking system
-- ✅ Encrypted data storage with user-defined keys
-- ✅ Settings management for API keys and preferences
 
 ## Database Migrations
 
@@ -50,7 +26,8 @@ Prompt Forge uses a migration system to manage database schema and data changes.
 1. Create a new SQL file in `migrations/` with timestamp naming: `YYYYMMDD_HHMMSS_description.sql`
 2. Write valid SQLite SQL statements (CREATE, ALTER, INSERT, etc.)
 3. Do not include `BEGIN TRANSACTION;` or `COMMIT;` - the system handles transactions
-4. Test the migration by running `npm run build` and loading the app
+4. Run `npm run sync-migrations-index` to update the index
+5. Test the migration by running the development server and loading the app in your browser
 
 Example migration file (`20251110_014400_init.sql`):
 ```sql
@@ -59,16 +36,6 @@ CREATE TABLE methodologies (...);
 -- Add indexes
 CREATE INDEX ...;
 ```
-
-### Syncing Migration Index
-
-After adding or removing migration files, update the index:
-
-```bash
-npm run sync-migrations-index
-```
-
-This updates `migrations/index.json` with the sorted list of migration files.
 
 ## Installation
 
