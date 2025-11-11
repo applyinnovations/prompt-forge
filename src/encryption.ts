@@ -5,7 +5,7 @@
 
 const SALT_LENGTH = 16;
 const IV_LENGTH = 12;
-const KEY_ITERATIONS = 100000; // High iteration count for security
+const KEY_ITERATIONS = 1000000;
 const KEY_LENGTH = 256;
 
 /**
