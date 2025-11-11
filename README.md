@@ -1,7 +1,8 @@
-
+<h1 align="center">
+    Prompt Forge
+</h1>
 <p align="center">
   <img src="images/demo.gif" alt="Prompt Forge Demo" />
- <h1> Prompt Forge </h1>
 </p>
 
 Prompt Forge is an open-source tool designed for researchers, penetration testers, and ethical hackers to iteratively modify, construct, and evolve prompt injection attacks. It leverages the structured techniques and taxonomies from the [Arc PI Taxonomy](https://github.com/Arcanum-Sec/arc_pi_taxonomy/) to facilitate the development and testing of adversarial prompts against AI systems.
