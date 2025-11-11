@@ -90,10 +90,38 @@ CREATE INDEX ...;
    - API credentials are encrypted using the key provided on page load
    - Use the wipe database option in the loading screen to reset all data
 
+## Contributing
+
+We welcome contributions to Prompt Forge! This includes:
+
+- **Bug reports and feature requests**: Use GitHub issues to report problems or suggest enhancements
+- **Code contributions**: Submit pull requests for bug fixes, new features, or improvements
+- **Methodology additions**: Extend the taxonomy by adding new attack techniques, intents, or evasion methods
+- **Documentation improvements**: Help improve documentation, tutorials, or examples
+
+### Adding New Methodologies
+
+The taxonomy system is designed to be extensible. To add new methodologies:
+
+1. Create a new SQL migration file in `migrations/` with INSERT statements for the methodologies table
+2. Follow the existing migration naming convention: `YYYYMMDD_HHMMSS_description.sql`
+3. Use INSERT statements to add new records to the methodologies table with appropriate type, name, description, path, examples, and prompt_samples
+4. Run `npm run sync-migrations-index` to update the migration index
+5. Test the migration by running the development server
+6. Submit a pull request with your migration file
+
+Optionally, you can also submit a pull request to the [Arc PI Taxonomy repository](https://github.com/Arcanum-Sec/arc_pi_taxonomy/) to propose the methodology to the wider community.
+
+## Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+This tool is intended for educational and research purposes only. Users are responsible for complying with applicable laws and regulations when using this software.
+
 ## Attribution
 
 This content/methodology is based on the [Arc PI Taxonomy](https://github.com/Arcanum-Sec/arc_pi_taxonomy/) created by Jason Haddix of [Arcanum Information Security](https://arcanum-sec.com/).
 
 ## License
 
-MIT
+MIT - see [LICENSE.md](LICENSE.md) for details
