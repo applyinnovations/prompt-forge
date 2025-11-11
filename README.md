@@ -13,7 +13,7 @@ Prompt Forge is an open-source tool designed for researchers, penetration tester
 - **Taxonomy Integration**: Built on the Arc PI Taxonomy with categorized attack techniques, intents, methods, and evasions loaded from a comprehensive database.
 - **AI-Powered Methodology Application**: Apply predefined or custom methodologies using OpenAI, Anthropic, or XAI models to evolve prompts intelligently.
 - **Prompt Versioning & Lineage Tracking**: Automatic versioning system with lineage tracking, allowing you to see the evolution of your prompts over time.
-- **Local Encrypted Storage**: All data stored locally using SQLite WASM with OPFS, credentials are encrypted using AES-256 with the in-memory key provided at login.
+- **Local Data Storage**: All data stored locally using SQLite WASM with OPFS, credentials are encrypted using AES-256 with the in-memory key provided at login.
 - **Model Selection**: Choose from multiple AI providers and models for methodology application.
 - **Prompt History**: Browse and restore previous prompt versions with detailed metadata.
 - **Ethical Use Only**: Intended solely for security research and defensive purposes.
